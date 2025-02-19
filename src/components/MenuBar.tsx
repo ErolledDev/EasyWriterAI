@@ -10,9 +10,10 @@ import {
   Code, CodeSquare, PanelLeftClose, PanelLeftOpen, Trash2,
   Copy, Scissors, Search, ZoomIn, ZoomOut, RotateCcw, Download,
   FileUp, Printer, Share2, Lock, Unlock, Settings, HelpCircle,
-  ListChecks, Hash, AtSign
+  ListChecks, Hash, AtSign, Moon, Sun
 } from 'lucide-react';
 import { convertToMarkdown, downloadFile } from '../lib/export';
+import { useTheme } from '../context/ThemeContext';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -23,6 +24,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [zoom, setZoom] = useState(100);
+  const { theme, toggleTheme } = useTheme();
 
   if (!editor) {
     return null;
@@ -429,6 +431,21 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         title="Redo"
       >
         <Redo className="w-5 h-5" />
+      </button>
+
+      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
+
+      {/* Theme Toggle */}
+      <button
+        onClick={toggleTheme}
+        className="toolbar-button"
+        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      >
+        {theme === 'dark' ? (
+          <Sun className="w-5 h-5" />
+        ) : (
+          <Moon className="w-5 h-5" />
+        )}
       </button>
     </div>
   );

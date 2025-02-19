@@ -1,6 +1,5 @@
 import React from 'react';
 import Editor from './components/Editor';
-import ThemeToggle from './components/ThemeToggle';
 import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
@@ -16,7 +15,6 @@ function App() {
           </div>
           <Editor />
         </div>
-        <ThemeToggle />
       </div>
     </ThemeProvider>
   );
