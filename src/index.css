@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Scrollbar Styles */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(147, 51, 234, 0.2);
+  border-radius: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(147, 51, 234, 0.4);
+}
+
 /* Editor Styles */
 .ProseMirror {
   @apply min-h-[300px] outline-none bg-[#1D1D1D] text-white text-base leading-relaxed rounded-b-lg;
