@@ -8,16 +8,16 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(167, 139, 250, 0.3);
+  background: rgba(167, 139, 250, 0.4);
   border-radius: 2px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(167, 139, 250, 0.5);
+  background: rgba(167, 139, 250, 0.6);
 }
 
 /* Animation */
@@ -38,22 +38,13 @@
 
 /* Editor Styles */
 .ProseMirror {
-  @apply min-h-[300px] outline-none bg-[#121212] text-gray-100 text-base leading-relaxed rounded-b-lg;
+  @apply min-h-[300px] outline-none bg-[#0D1117] text-gray-100 text-base leading-relaxed rounded-b-lg;
   @apply p-6 sm:p-8;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
   @apply text-gray-500 float-left h-0 pointer-events-none;
   content: attr(data-placeholder);
-}
-
-/* Tooltip Styles */
-.tooltip {
-  @apply invisible absolute;
-}
-
-.has-tooltip:hover .tooltip {
-  @apply visible z-50;
 }
 
 /* Table Styles */
@@ -63,26 +54,29 @@
 
 .ProseMirror table td,
 .ProseMirror table th {
-  @apply border border-gray-700 p-2 relative;
+  @apply border border-gray-800 p-2 relative;
   min-width: 100px;
 }
 
 .ProseMirror table th {
-  @apply bg-[#1A1A1A] font-medium text-gray-200;
+  @apply bg-[#161B22] font-medium text-gray-200;
 }
 
 /* Code Block Styles */
 .ProseMirror pre {
-  @apply bg-[#1A1A1A] text-gray-100 p-4 rounded-md my-4 overflow-x-auto font-mono text-sm;
+  @apply bg-[#161B22] text-gray-100 p-4 rounded-md my-4 overflow-x-auto font-mono text-sm;
+  @apply border border-gray-800;
 }
 
 .ProseMirror code {
-  @apply bg-[#1A1A1A] text-gray-100 px-1.5 py-0.5 rounded text-sm font-mono;
+  @apply bg-[#161B22] text-gray-100 px-1.5 py-0.5 rounded text-sm font-mono;
+  @apply border border-gray-800;
 }
 
 /* Blockquote Styles */
 .ProseMirror blockquote {
-  @apply border-l-2 border-gray-600 pl-4 italic my-4 text-gray-200;
+  @apply border-l-2 border-purple-500 pl-4 italic my-4 text-gray-200;
+  @apply bg-[#161B22] p-4 rounded-r-md;
 }
 
 /* List Styles */
@@ -113,45 +107,52 @@
 
 /* Mention Styles */
 .mention {
-  @apply bg-[#1A1A1A] text-blue-300 px-1 rounded-sm font-medium;
+  @apply bg-[#161B22] text-purple-400 px-2 py-0.5 rounded-md font-medium;
+  @apply border border-purple-500/20;
 }
 
 /* Image Styles */
 .ProseMirror img {
-  @apply max-w-full h-auto rounded-md shadow-md my-4 mx-auto;
+  @apply max-w-full h-auto rounded-md shadow-lg my-4 mx-auto;
+  @apply border border-gray-800;
 }
 
 /* Link Styles */
 .ProseMirror a {
-  @apply text-blue-300 hover:text-blue-200 no-underline border-b border-blue-600 hover:border-blue-400 transition-colors;
+  @apply text-purple-400 no-underline border-b border-purple-500/30 transition-all duration-200;
+  @apply hover:text-purple-300 hover:border-purple-400;
 }
 
 /* Heading Styles */
 .ProseMirror h1 {
-  @apply text-3xl font-semibold mb-4 mt-6 text-gray-100;
+  @apply text-3xl font-bold mb-4 mt-6 text-gray-100;
+  @apply bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent;
 }
 
 .ProseMirror h2 {
   @apply text-2xl font-semibold mb-3 mt-5 text-gray-100;
+  @apply bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent;
 }
 
 .ProseMirror h3 {
   @apply text-xl font-semibold mb-3 mt-4 text-gray-100;
+  @apply bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent;
 }
 
 /* Highlight Styles */
 .ProseMirror mark {
-  @apply bg-yellow-500/30 px-1 rounded text-yellow-100;
+  @apply bg-purple-500/20 px-1 rounded text-purple-100;
 }
 
 /* YouTube Embed Styles */
 .ProseMirror iframe {
   @apply w-full aspect-video rounded-md shadow-md my-4;
+  @apply border border-gray-800;
 }
 
 /* Selection Styles */
 .ProseMirror ::selection {
-  @apply bg-blue-500/40;
+  @apply bg-purple-500/30 text-purple-50;
 }
 
 /* Focus Styles */
@@ -167,30 +168,34 @@
 
 /* Toolbar Button Styles */
 .toolbar-button {
-  @apply p-1.5 rounded-md transition-colors duration-200 ease-in-out;
-  @apply hover:bg-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-blue-400/50;
-  @apply active:bg-[#242424];
+  @apply p-1.5 rounded-md transition-all duration-200;
+  @apply text-gray-400 hover:text-gray-100;
+  @apply hover:bg-purple-500/20 active:bg-purple-500/30;
+  @apply focus:outline-none focus:ring-2 focus:ring-purple-500/50;
 }
 
 .toolbar-button.active {
-  @apply bg-[#1A1A1A] text-blue-300;
+  @apply bg-purple-500/20 text-purple-300;
 }
 
 /* Dropdown Menu Styles */
 .dropdown-menu {
-  @apply absolute z-50 mt-1 bg-[#121212] rounded-md shadow-lg border border-gray-700;
+  @apply absolute z-50 mt-1 bg-[#0D1117] rounded-md shadow-xl;
+  @apply border border-gray-800 backdrop-blur-sm;
   @apply py-1 min-w-[160px] max-h-60 overflow-y-auto;
 }
 
 .dropdown-item {
-  @apply px-3 py-1.5 text-sm text-gray-200 hover:bg-[#1A1A1A] cursor-pointer;
+  @apply px-3 py-1.5 text-sm text-gray-300 hover:text-white cursor-pointer;
+  @apply hover:bg-purple-500/20 transition-colors duration-200;
   @apply flex items-center gap-2;
 }
 
 /* Search Input Styles */
 .search-input {
-  @apply px-2 py-1 text-sm border border-gray-600 rounded-md bg-[#1A1A1A] text-gray-100;
-  @apply focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50;
+  @apply px-2 py-1 text-sm border border-gray-800 rounded-md;
+  @apply bg-[#161B22] text-gray-100;
+  @apply focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50;
   @apply placeholder-gray-500;
 }
 
@@ -200,22 +205,69 @@
 }
 
 .zoom-button {
-  @apply p-1.5 rounded-md hover:bg-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-blue-400/50;
+  @apply p-1.5 rounded-md transition-all duration-200;
+  @apply hover:bg-purple-500/20 hover:text-purple-300;
+  @apply focus:outline-none focus:ring-2 focus:ring-purple-500/50;
 }
 
 /* Editor Container Styles */
 .editor-container {
-  @apply bg-[#121212] rounded-lg shadow-lg border border-gray-700 overflow-hidden;
+  @apply bg-[#0D1117] rounded-lg shadow-2xl overflow-hidden;
+  @apply border border-gray-800;
   @apply w-full mx-auto;
 }
 
 /* Toolbar Container Styles */
 .toolbar-container {
-  @apply border-b border-gray-700 bg-[#121212] sticky top-0 z-10;
+  @apply border-b border-gray-800 bg-[#0D1117] sticky top-0 z-10;
+  @apply bg-opacity-95 backdrop-blur-sm;
 }
 
 /* Status Bar Styles */
 .status-bar {
-  @apply px-4 py-2 border-t border-gray-700 bg-[#1A1A1A];
-  @apply flex justify-between items-center text-sm text-gray-300;
+  @apply px-4 py-2 border-t border-gray-800 bg-[#161B22];
+  @apply flex justify-between items-center text-sm text-gray-400;
+}
+
+/* AI Menu Hover States */
+.ai-menu-button {
+  @apply transition-all duration-200;
+  @apply hover:bg-purple-500/20 hover:text-purple-300;
+  @apply active:bg-purple-500/30;
+}
+
+.ai-menu-category {
+  @apply transition-all duration-200;
+  @apply hover:bg-purple-500/20 hover:border-purple-500/30;
+}
+
+.ai-menu-action {
+  @apply transition-all duration-200;
+  @apply hover:bg-purple-500/20 hover:text-purple-300;
+  @apply active:bg-purple-500/30;
+}
+
+/* Tool Button Hover States */
+.tool-button {
+  @apply transition-all duration-200;
+  @apply hover:bg-purple-500/20 hover:text-purple-300;
+  @apply active:bg-purple-500/30;
+  @apply focus:outline-none focus:ring-2 focus:ring-purple-500/50;
+}
+
+.tool-button-active {
+  @apply bg-purple-500/20 text-purple-300;
+}
+
+/* Tooltip Improvements */
+.tooltip {
+  @apply absolute z-50 px-2 py-1 text-xs font-medium;
+  @apply bg-[#161B22] text-gray-200 rounded-md shadow-xl;
+  @apply border border-gray-800;
+  @apply opacity-0 transition-opacity duration-200;
+  @apply pointer-events-none;
+}
+
+.tooltip-visible {
+  @apply opacity-100;
 }
