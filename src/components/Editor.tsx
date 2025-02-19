@@ -33,6 +33,27 @@ import { useState } from 'react';
 import AIMenu from './AIMenu';
 import MenuBar from './MenuBar';
 
+// Custom Image extension with resizing
+const ResizableImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: 'auto',
+        renderHTML: attributes => ({
+          width: attributes.width,
+        }),
+      },
+      height: {
+        default: 'auto',
+        renderHTML: attributes => ({
+          height: attributes.height,
+        }),
+      },
+    };
+  },
+});
+
 const Editor = () => {
   const [showAIMenu, setShowAIMenu] = useState(true);
   const [characterCount, setCharacterCount] = useState(0);
@@ -67,9 +88,9 @@ const Editor = () => {
       TableRow,
       TableHeader,
       TableCell,
-      Image.configure({
+      ResizableImage.configure({
         HTMLAttributes: {
-          class: 'max-w-full rounded-lg shadow-md',
+          class: 'max-w-full rounded-lg shadow-md cursor-pointer',
         },
       }),
       Youtube.configure({
@@ -120,6 +141,80 @@ const Editor = () => {
       attributes: {
         class:
           'prose prose-invert prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none p-8 min-h-[calc(100vh-13rem)] bg-white dark:bg-[#0D1117] text-gray-900 dark:text-gray-100 transition-colors duration-200',
+      },
+      handleDrop: (view, event, slice, moved) => {
+        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+          const file = event.dataTransfer.files[0];
+          if (file.type.startsWith('image/')) {
+            // Handle image drop
+            const reader = new FileReader();
+            reader.onload = (readerEvent) => {
+              const img = new Image();
+              img.onload = () => {
+                // Calculate dimensions maintaining aspect ratio
+                let width = img.width;
+                let height = img.height;
+                const maxWidth = 800;
+                
+                if (width > maxWidth) {
+                  height = (height * maxWidth) / width;
+                  width = maxWidth;
+                }
+
+                const { tr } = view.state;
+                const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos;
+                if (pos) {
+                  view.dispatch(tr.insert(pos, view.state.schema.nodes.image.create({
+                    src: readerEvent.target?.result,
+                    width,
+                    height,
+                  })));
+                }
+              };
+              img.src = readerEvent.target?.result as string;
+            };
+            reader.readAsDataURL(file);
+            return true;
+          }
+        }
+        return false;
+      },
+      handlePaste: (view, event) => {
+        const items = Array.from(event.clipboardData?.items || []);
+        const imageItem = items.find(item => item.type.startsWith('image/'));
+        
+        if (imageItem) {
+          event.preventDefault();
+          const file = imageItem.getAsFile();
+          if (!file) return false;
+
+          const reader = new FileReader();
+          reader.onload = (readerEvent) => {
+            const img = new Image();
+            img.onload = () => {
+              // Calculate dimensions maintaining aspect ratio
+              let width = img.width;
+              let height = img.height;
+              const maxWidth = 800;
+              
+              if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+              }
+
+              const { tr } = view.state;
+              view.dispatch(tr.replaceSelectionWith(view.state.schema.nodes.image.create({
+                src: readerEvent.target?.result,
+                width,
+                height,
+              })));
+            };
+            img.src = readerEvent.target?.result as string;
+          };
+          reader.readAsDataURL(file);
+          return true;
+        }
+        return false;
       },
     },
     onUpdate: ({ editor }) => {
