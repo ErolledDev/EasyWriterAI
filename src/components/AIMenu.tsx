@@ -161,7 +161,7 @@ export default function AIMenu({ editor, isOpen, onClose }: AIMenuProps) {
             <Sparkles className="w-3 h-3 text-blue-500 dark:text-blue-400 absolute -top-1 -right-1" />
           </div>
           <span className="font-medium text-gray-900 dark:text-gray-100">AI Assistant</span>
-          <GripHorizontal className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+       
         </div>
         <button
           onClick={onClose}
