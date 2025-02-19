@@ -19,22 +19,76 @@ export function convertToPlainText(html: string): string {
 }
 
 export async function convertToPDF(editorElement: HTMLElement): Promise<Blob> {
-  const canvas = await html2canvas(editorElement, {
-    scale: 2,
-    useCORS: true,
-    logging: false,
+  // Create a clone of the editor element to modify for PDF export
+  const clone = editorElement.cloneNode(true) as HTMLElement;
+  const tempContainer = document.createElement('div');
+  tempContainer.appendChild(clone);
+  tempContainer.style.position = 'absolute';
+  tempContainer.style.left = '-9999px';
+  tempContainer.style.background = 'white';
+  document.body.appendChild(tempContainer);
+
+  // Add margins to the clone
+  clone.style.padding = '40px';
+  clone.style.background = 'white';
+  clone.style.color = '#1a1a1a';
+
+  // Fix heading colors
+  const headings = clone.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  headings.forEach(heading => {
+    heading.style.color = '#1a1a1a';
+    heading.style.background = 'none';
+    heading.style.backgroundClip = 'initial';
+    heading.style.webkitBackgroundClip = 'initial';
+    heading.style.webkitTextFillColor = 'initial';
   });
 
-  const pdf = new jsPDF({
-    orientation: 'p',
-    unit: 'px',
-    format: [canvas.width, canvas.height],
+  // Ensure links are visible and blue
+  const links = clone.querySelectorAll('a');
+  links.forEach(link => {
+    link.style.color = '#2563eb';
+    link.style.textDecoration = 'underline';
   });
 
-  const imgData = canvas.toDataURL('image/png');
-  pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+  // Ensure all text is visible
+  const allText = clone.querySelectorAll('p, span, li, td, th, blockquote');
+  allText.forEach(element => {
+    (element as HTMLElement).style.color = '#1a1a1a';
+  });
 
-  return pdf.output('blob');
+  try {
+    // Capture the modified clone
+    const canvas = await html2canvas(clone, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: 'white',
+    });
+
+    // Remove the temporary container
+    document.body.removeChild(tempContainer);
+
+    // Calculate PDF dimensions with margins
+    const imgWidth = 595.28; // A4 width in points
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    const pdf = new jsPDF({
+      orientation: imgHeight > imgWidth ? 'p' : 'l',
+      unit: 'pt',
+      format: [imgWidth, imgHeight],
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+    return pdf.output('blob');
+  } catch (error) {
+    // Clean up on error
+    if (document.body.contains(tempContainer)) {
+      document.body.removeChild(tempContainer);
+    }
+    throw error;
+  }
 }
 
 export type ExportFormat = 'markdown' | 'html' | 'txt' | 'pdf';
