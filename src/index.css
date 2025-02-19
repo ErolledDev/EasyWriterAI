@@ -1,3 +1,167 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Editor Styles */
+.ProseMirror {
+  @apply min-h-[300px] outline-none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  @apply text-gray-400 float-left h-0 pointer-events-none;
+  content: attr(data-placeholder);
+}
+
+/* Tooltip Styles */
+.tooltip {
+  @apply invisible absolute;
+}
+
+.has-tooltip:hover .tooltip {
+  @apply visible z-50;
+}
+
+/* Table Styles */
+.ProseMirror table {
+  @apply border-collapse w-full my-4;
+}
+
+.ProseMirror table td,
+.ProseMirror table th {
+  @apply border border-gray-300 p-2 relative;
+  min-width: 100px;
+}
+
+.ProseMirror table th {
+  @apply bg-gray-50 font-semibold;
+}
+
+/* Code Block Styles */
+.ProseMirror pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg my-4 overflow-x-auto;
+}
+
+.ProseMirror code {
+  @apply bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+/* Blockquote Styles */
+.ProseMirror blockquote {
+  @apply border-l-4 border-blue-500 pl-4 italic my-4 text-gray-700;
+}
+
+/* List Styles */
+.ProseMirror ul {
+  @apply list-disc pl-6 my-4;
+}
+
+.ProseMirror ol {
+  @apply list-decimal pl-6 my-4;
+}
+
+/* Image Styles */
+.ProseMirror img {
+  @apply max-w-full h-auto rounded-lg shadow-md my-4 mx-auto;
+}
+
+/* Link Styles */
+.ProseMirror a {
+  @apply text-blue-600 hover:text-blue-800 underline;
+}
+
+/* Heading Styles */
+.ProseMirror h1 {
+  @apply text-4xl font-bold mb-4 mt-6;
+}
+
+.ProseMirror h2 {
+  @apply text-3xl font-bold mb-3 mt-5;
+}
+
+.ProseMirror h3 {
+  @apply text-2xl font-bold mb-3 mt-4;
+}
+
+/* Highlight Styles */
+.ProseMirror mark {
+  @apply bg-yellow-200 px-1 rounded;
+}
+
+/* YouTube Embed Styles */
+.ProseMirror iframe {
+  @apply w-full aspect-video rounded-lg shadow-md my-4;
+}
+
+/* Selection Styles */
+.ProseMirror ::selection {
+  @apply bg-blue-100;
+}
+
+/* Focus Styles */
+.ProseMirror:focus {
+  @apply outline-none ring-2 ring-blue-200 ring-opacity-50;
+}
+
+/* Placeholder Styles */
+.ProseMirror p.is-empty::before {
+  @apply text-gray-400 float-left h-0 pointer-events-none;
+  content: attr(data-placeholder);
+}
+
+/* Toolbar Button Styles */
+.toolbar-button {
+  @apply p-2 rounded-md transition-colors duration-200 ease-in-out;
+  @apply hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300;
+  @apply active:bg-gray-200;
+}
+
+.toolbar-button.active {
+  @apply bg-blue-50 text-blue-600;
+}
+
+/* Dropdown Menu Styles */
+.dropdown-menu {
+  @apply absolute z-50 mt-1 bg-white rounded-lg shadow-lg border border-gray-200;
+  @apply py-1 min-w-[160px] max-h-60 overflow-y-auto;
+}
+
+.dropdown-item {
+  @apply px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer;
+  @apply flex items-center gap-2;
+}
+
+/* Search Input Styles */
+.search-input {
+  @apply px-3 py-1.5 text-sm border border-gray-300 rounded-md;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-300;
+  @apply placeholder-gray-400;
+}
+
+/* Zoom Controls Styles */
+.zoom-control {
+  @apply flex items-center gap-1 text-sm text-gray-600;
+}
+
+.zoom-button {
+  @apply p-1.5 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300;
+}
+
+/* AI Menu Styles */
+.ai-menu {
+  @apply fixed right-8 top-32 w-64 bg-white rounded-lg shadow-xl border border-gray-200;
+  @apply z-50 max-h-[80vh] overflow-hidden flex flex-col;
+}
+
+.ai-menu-header {
+  @apply p-3 border-b border-gray-200 flex items-center justify-between bg-purple-50;
+}
+
+.ai-menu-content {
+  @apply overflow-y-auto flex-1 p-2;
+}
+
+.ai-action-button {
+  @apply w-full text-left px-3 py-2 text-sm rounded transition-colors;
+  @apply hover:bg-purple-50 text-gray-700 hover:text-purple-700;
+  @apply flex items-center gap-2;
+}

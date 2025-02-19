@@ -18,43 +18,17 @@ import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import FontFamily from '@tiptap/extension-font-family';
 import {
-  Bold,
-  Italic,
-  List,
-  ListOrdered,
-  Quote,
-  Redo,
-  Strikethrough,
-  Undo,
-  Link as LinkIcon,
-  Highlighter,
-  Wand2,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignJustify,
-  Heading1,
-  Heading2,
-  Heading3,
-  Table as TableIcon,
-  Image as ImageIcon,
-  Youtube as YoutubeIcon,
-  FileDown,
-  Palette,
-  Type,
-  Eraser,
-  Eye,
-  MinusSquare,
-  Underline as UnderlineIcon,
-  Subscript as SubscriptIcon,
-  Superscript as SuperscriptIcon,
-  Code,
-  CodeSquare,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Trash2,
+  Bold, Italic, List, ListOrdered, Quote, Redo, Strikethrough, Undo,
+  Link as LinkIcon, Highlighter, Wand2, AlignLeft, AlignCenter, AlignRight,
+  AlignJustify, Heading1, Heading2, Heading3, Table as TableIcon,
+  Image as ImageIcon, Youtube as YoutubeIcon, FileDown, Palette, Type,
+  Eraser, Eye, MinusSquare, Underline as UnderlineIcon,
+  Subscript as SubscriptIcon, Superscript as SuperscriptIcon,
+  Code, CodeSquare, PanelLeftClose, PanelLeftOpen, Trash2,
+  Copy, Scissors, Search, ZoomIn, ZoomOut, RotateCcw, Download,
+  FileUp, Printer, Share2, Lock, Unlock, Settings, HelpCircle
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import AIMenu from './AIMenu';
 import { convertToMarkdown, downloadFile } from '../lib/export';
 
@@ -64,17 +38,20 @@ const FONT_SIZES = [
 ];
 
 const FONT_FAMILIES = [
-  'Arial',
-  'Times New Roman',
-  'Courier New',
-  'Georgia',
-  'Verdana',
-  'Helvetica',
-  'Tahoma',
-  'Trebuchet MS',
-  'Impact',
-  'Comic Sans MS',
+  'Arial', 'Times New Roman', 'Courier New', 'Georgia', 'Verdana',
+  'Helvetica', 'Tahoma', 'Trebuchet MS', 'Impact', 'Comic Sans MS'
 ];
+
+const Tooltip = ({ children, text }: { children: React.ReactNode; text: string }) => {
+  return (
+    <div className="group relative">
+      {children}
+      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+        {text}
+      </div>
+    </div>
+  );
+};
 
 const MenuBar = ({ editor }: { editor: any }) => {
   const [showAIMenu, setShowAIMenu] = useState(false);
@@ -83,19 +60,77 @@ const MenuBar = ({ editor }: { editor: any }) => {
   const [showFontSize, setShowFontSize] = useState(false);
   const [showFontFamily, setShowFontFamily] = useState(false);
   const [isFullWidth, setIsFullWidth] = useState(true);
+  const [isReadOnly, setIsReadOnly] = useState(false);
+  const [zoom, setZoom] = useState(100);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  if (!editor) {
-    return null;
-  }
+  if (!editor) return null;
+
+  const handleCopy = () => {
+    const text = editor.state.selection.empty
+      ? editor.getText()
+      : editor.state.doc.textBetween(
+          editor.state.selection.from,
+          editor.state.selection.to
+        );
+    navigator.clipboard.writeText(text);
+  };
+
+  const handleCut = () => {
+    handleCopy();
+    if (!editor.state.selection.empty) {
+      editor.commands.deleteSelection();
+    }
+  };
+
+  const handlePrint = () => {
+    const content = editor.getHTML();
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Print Document</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              img { max-width: 100%; height: auto; }
+            </style>
+          </head>
+          <body>${content}</body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const handleSearch = () => {
+    const searchTerm = searchInputRef.current?.value;
+    if (!searchTerm) return;
+
+    const text = editor.getText();
+    const regex = new RegExp(searchTerm, 'gi');
+    let match;
+    const positions: number[] = [];
+
+    while ((match = regex.exec(text)) !== null) {
+      positions.push(match.index);
+    }
+
+    // Highlight matches (you would need to implement this based on your needs)
+    // This is a simple example that could be enhanced
+    editor.commands.unsetHighlight();
+    positions.forEach(pos => {
+      editor.commands.setTextSelection({ from: pos, to: pos + searchTerm.length });
+      editor.commands.setHighlight();
+    });
+  };
 
   const addLink = () => {
     const previousUrl = editor.getAttributes('link').href;
     const url = window.prompt('Enter URL', previousUrl);
     
-    if (url === null) {
-      return; // Cancelled
-    }
-
+    if (url === null) return;
     if (url === '') {
       editor.chain().focus().unsetLink().run();
       return;
@@ -147,61 +182,140 @@ const MenuBar = ({ editor }: { editor: any }) => {
     }
   };
 
+  const handleZoom = (direction: 'in' | 'out') => {
+    const newZoom = direction === 'in' ? zoom + 10 : zoom - 10;
+    setZoom(Math.max(50, Math.min(200, newZoom)));
+    const editorElement = document.querySelector('.ProseMirror');
+    if (editorElement) {
+      (editorElement as HTMLElement).style.transform = `scale(${newZoom / 100})`;
+      (editorElement as HTMLElement).style.transformOrigin = 'top left';
+    }
+  };
+
   return (
     <div className="border-b border-gray-200">
       {/* Main Toolbar */}
       <div className="p-2 flex flex-wrap gap-2 border-b border-gray-200">
+        {/* File Operations */}
+        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
+          <Tooltip text="New Document">
+            <button
+              onClick={clearContent}
+              className="p-2 rounded hover:bg-gray-100"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Import File">
+            <button className="p-2 rounded hover:bg-gray-100">
+              <FileUp className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Export">
+            <div className="relative group">
+              <button className="p-2 rounded hover:bg-gray-100">
+                <FileDown className="w-4 h-4" />
+              </button>
+              <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 hidden group-hover:block z-50">
+                <button
+                  onClick={() => handleExport('markdown')}
+                  className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                >
+                  Export as Markdown
+                </button>
+                <button
+                  onClick={() => handleExport('html')}
+                  className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                >
+                  Export as HTML
+                </button>
+                <button
+                  onClick={() => handleExport('text')}
+                  className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                >
+                  Export as Text
+                </button>
+              </div>
+            </div>
+          </Tooltip>
+        </div>
+
+        {/* Edit Operations */}
+        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
+          <Tooltip text="Copy">
+            <button
+              onClick={handleCopy}
+              className="p-2 rounded hover:bg-gray-100"
+            >
+              <Copy className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Cut">
+            <button
+              onClick={handleCut}
+              className="p-2 rounded hover:bg-gray-100"
+            >
+              <Scissors className="w-4 h-4" />
+            </button>
+          </Tooltip>
+        </div>
+
         {/* Text Style */}
         <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
-          <button
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('bold') ? 'bg-gray-100' : ''
-            }`}
-            title="Bold (Ctrl+B)"
-          >
-            <Bold className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('italic') ? 'bg-gray-100' : ''
-            }`}
-            title="Italic (Ctrl+I)"
-          >
-            <Italic className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('underline') ? 'bg-gray-100' : ''
-            }`}
-            title="Underline (Ctrl+U)"
-          >
-            <UnderlineIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleStrike().run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('strike') ? 'bg-gray-100' : ''
-            }`}
-            title="Strikethrough"
-          >
-            <Strikethrough className="w-4 h-4" />
-          </button>
+          <Tooltip text="Bold">
+            <button
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('bold') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <Bold className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Italic">
+            <button
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('italic') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <Italic className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Underline">
+            <button
+              onClick={() => editor.chain().focus().toggleUnderline().run()}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('underline') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <UnderlineIcon className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Strikethrough">
+            <button
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('strike') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <Strikethrough className="w-4 h-4" />
+            </button>
+          </Tooltip>
         </div>
 
         {/* Font Controls */}
         <div className="flex items-center gap-2 pr-2 border-r border-gray-200">
-          {/* Font Family */}
           <div className="relative">
-            <button
-              onClick={() => setShowFontFamily(!showFontFamily)}
-              className="p-2 rounded hover:bg-gray-100 flex items-center gap-1 min-w-[120px]"
-            >
-              <Type className="w-4 h-4" />
-              <span className="text-sm">Font Family</span>
-            </button>
+            <Tooltip text="Font Family">
+              <button
+                onClick={() => setShowFontFamily(!showFontFamily)}
+                className="p-2 rounded hover:bg-gray-100 flex items-center gap-1 min-w-[120px]"
+              >
+                <Type className="w-4 h-4" />
+                <span className="text-sm">Font Family</span>
+              </button>
+            </Tooltip>
             {showFontFamily && (
               <div className="absolute top-full left-0 mt-1 p-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 w-48 max-h-60 overflow-y-auto">
                 {FONT_FAMILIES.map(font => (
@@ -221,14 +335,15 @@ const MenuBar = ({ editor }: { editor: any }) => {
             )}
           </div>
 
-          {/* Font Size */}
           <div className="relative">
-            <button
-              onClick={() => setShowFontSize(!showFontSize)}
-              className="p-2 rounded hover:bg-gray-100 flex items-center gap-1 min-w-[100px]"
-            >
-              <span className="text-sm">Font Size</span>
-            </button>
+            <Tooltip text="Font Size">
+              <button
+                onClick={() => setShowFontSize(!showFontSize)}
+                className="p-2 rounded hover:bg-gray-100 flex items-center gap-1 min-w-[100px]"
+              >
+                <span className="text-sm">Font Size</span>
+              </button>
+            </Tooltip>
             {showFontSize && (
               <div className="absolute top-full left-0 mt-1 p-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 w-32 max-h-60 overflow-y-auto">
                 {FONT_SIZES.map(size => (
@@ -248,15 +363,15 @@ const MenuBar = ({ editor }: { editor: any }) => {
             )}
           </div>
 
-          {/* Color Picker */}
           <div className="relative">
-            <button
-              onClick={() => setShowColorPicker(!showColorPicker)}
-              className="p-2 rounded hover:bg-gray-100 flex items-center gap-1"
-              title="Text Color"
-            >
-              <Palette className="w-4 h-4" />
-            </button>
+            <Tooltip text="Text Color">
+              <button
+                onClick={() => setShowColorPicker(!showColorPicker)}
+                className="p-2 rounded hover:bg-gray-100"
+              >
+                <Palette className="w-4 h-4" />
+              </button>
+            </Tooltip>
             {showColorPicker && (
               <div className="absolute top-full left-0 mt-1 p-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 w-56">
                 <div className="grid grid-cols-8 gap-1">
@@ -283,75 +398,100 @@ const MenuBar = ({ editor }: { editor: any }) => {
           </div>
         </div>
 
-        {/* Headings */}
+        {/* View Controls */}
         <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
-          <button
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('heading', { level: 1 }) ? 'bg-gray-100' : ''
-            }`}
-            title="Heading 1"
-          >
-            <Heading1 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('heading', { level: 2 }) ? 'bg-gray-100' : ''
-            }`}
-            title="Heading 2"
-          >
-            <Heading2 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('heading', { level: 3 }) ? 'bg-gray-100' : ''
-            }`}
-            title="Heading 3"
-          >
-            <Heading3 className="w-4 h-4" />
-          </button>
+          <Tooltip text="Zoom In">
+            <button
+              onClick={() => handleZoom('in')}
+              className="p-2 rounded hover:bg-gray-100"
+            >
+              <ZoomIn className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Zoom Out">
+            <button
+              onClick={() => handleZoom('out')}
+              className="p-2 rounded hover:bg-gray-100"
+            >
+              <ZoomOut className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <span className="text-sm text-gray-500">{zoom}%</span>
         </div>
 
-        {/* Alignment */}
+        {/* Search */}
         <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
-          <button
-            onClick={() => editor.chain().focus().setTextAlign('left').run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive({ textAlign: 'left' }) ? 'bg-gray-100' : ''
-            }`}
-            title="Align Left"
-          >
-            <AlignLeft className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().setTextAlign('center').run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive({ textAlign: 'center' }) ? 'bg-gray-100' : ''
-            }`}
-            title="Align Center"
-          >
-            <AlignCenter className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().setTextAlign('right').run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive({ textAlign: 'right' }) ? 'bg-gray-100' : ''
-            }`}
-            title="Align Right"
-          >
-            <AlignRight className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive({ textAlign: 'justify' }) ? 'bg-gray-100' : ''
-            }`}
-            title="Justify"
-          >
-            <AlignJustify className="w-4 h-4" />
-          </button>
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Search..."
+            className="px-2 py-1 border border-gray-300 rounded text-sm"
+          />
+          <Tooltip text="Search">
+            <button
+              onClick={handleSearch}
+              className="p-2 rounded hover:bg-gray-100"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          </Tooltip>
+        </div>
+
+        {/* Right-aligned tools */}
+        <div className="flex items-center gap-2 ml-auto">
+          <Tooltip text="Print">
+            <button
+              onClick={handlePrint}
+              className="p-2 rounded hover:bg-gray-100"
+            >
+              <Printer className="w-4 h-4" />
+            </button>
+          </Tooltip>
+
+          <Tooltip text="Share">
+            <button className="p-2 rounded hover:bg-gray-100">
+              <Share2 className="w-4 h-4" />
+            </button>
+          </Tooltip>
+
+          <Tooltip text={isReadOnly ? "Unlock Editing" : "Lock Editing"}>
+            <button
+              onClick={() => {
+                setIsReadOnly(!isReadOnly);
+                editor.setEditable(!isReadOnly);
+              }}
+              className="p-2 rounded hover:bg-gray-100"
+            >
+              {isReadOnly ? (
+                <Lock className="w-4 h-4" />
+              ) : (
+                <Unlock className="w-4 h-4" />
+              )}
+            </button>
+          </Tooltip>
+
+          <Tooltip text="Settings">
+            <button className="p-2 rounded hover:bg-gray-100">
+              <Settings className="w-4 h-4" />
+            </button>
+          </Tooltip>
+
+          <Tooltip text="Help">
+            <button className="p-2 rounded hover:bg-gray-100">
+              <HelpCircle className="w-4 h-4" />
+            </button>
+          </Tooltip>
+
+          <Tooltip text="AI Assistant">
+            <button
+              onClick={() => setShowAIMenu(!showAIMenu)}
+              className={`p-2 rounded hover:bg-purple-100 ${
+                showAIMenu ? 'bg-purple-100' : ''
+              }`}
+            >
+              <Wand2 className="w-4 h-4 text-purple-600" />
+            </button>
+          </Tooltip>
         </div>
       </div>
 
@@ -359,236 +499,154 @@ const MenuBar = ({ editor }: { editor: any }) => {
       <div className="p-2 flex flex-wrap gap-2">
         {/* Lists and Quotes */}
         <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
-          <button
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('bulletList') ? 'bg-gray-100' : ''
-            }`}
-            title="Bullet List"
-          >
-            <List className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('orderedList') ? 'bg-gray-100' : ''
-            }`}
-            title="Numbered List"
-          >
-            <ListOrdered className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('blockquote') ? 'bg-gray-100' : ''
-            }`}
-            title="Quote"
-          >
-            <Quote className="w-4 h-4" />
-          </button>
+          <Tooltip text="Bullet List">
+            <button
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('bulletList') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Numbered List">
+            <button
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('orderedList') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <ListOrdered className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Quote">
+            <button
+              onClick={() => editor.chain().focus().toggleBlockquote().run()}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('blockquote') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <Quote className="w-4 h-4" />
+            </button>
+          </Tooltip>
         </div>
 
         {/* Script Controls */}
         <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
-          <button
-            onClick={() => editor.chain().focus().toggleSubscript().run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('subscript') ? 'bg-gray-100' : ''
-            }`}
-            title="Subscript"
-          >
-            <SubscriptIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleSuperscript().run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('superscript') ? 'bg-gray-100' : ''
-            }`}
-            title="Superscript"
-          >
-            <SuperscriptIcon className="w-4 h-4" />
-          </button>
+          <Tooltip text="Subscript">
+            <button
+              onClick={() => editor.chain().focus().toggleSubscript().run()}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('subscript') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <SubscriptIcon className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Superscript">
+            <button
+              onClick={() => editor.chain().focus().toggleSuperscript().run()}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('superscript') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <SuperscriptIcon className="w-4 h-4" />
+            </button>
+          </Tooltip>
         </div>
 
         {/* Code */}
         <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
-          <button
-            onClick={() => editor.chain().focus().toggleCode().run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('code') ? 'bg-gray-100' : ''
-            }`}
-            title="Inline Code"
-          >
-            <Code className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('codeBlock') ? 'bg-gray-100' : ''
-            }`}
-            title="Code Block"
-          >
-            <CodeSquare className="w-4 h-4" />
-          </button>
+          <Tooltip text="Inline Code">
+            <button
+              onClick={() => editor.chain().focus().toggleCode().run()}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('code') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <Code className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Code Block">
+            <button
+              onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('codeBlock') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <CodeSquare className="w-4 h-4" />
+            </button>
+          </Tooltip>
         </div>
 
         {/* Insert Tools */}
         <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
-          <button
-            onClick={addLink}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('link') ? 'bg-gray-100' : ''
-            }`}
-            title="Insert Link"
-          >
-            <LinkIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={insertTable}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('table') ? 'bg-gray-100' : ''
-            }`}
-            title="Insert Table"
-          >
-            <TableIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={addImage}
-            className="p-2 rounded hover:bg-gray-100"
-            title="Insert Image"
-          >
-            <ImageIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={addYoutubeVideo}
-            className="p-2 rounded hover:bg-gray-100"
-            title="Insert YouTube Video"
-          >
-            <YoutubeIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().setHorizontalRule().run()}
-            className="p-2 rounded hover:bg-gray-100"
-            title="Insert Horizontal Rule"
-          >
-            <MinusSquare className="w-4 h-4" />
-          </button>
+          <Tooltip text="Insert Link">
+            <button
+              onClick={addLink}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('link') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <LinkIcon className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Insert Table">
+            <button
+              onClick={insertTable}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('table') ? 'bg-gray-100' : ''
+              }`}
+            >
+              <TableIcon className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Insert Image">
+            <button
+              onClick={addImage}
+              className="p-2 rounded hover:bg-gray-100"
+            >
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Insert YouTube Video">
+            <button
+              onClick={addYoutubeVideo}
+              className="p-2 rounded hover:bg-gray-100"
+            >
+              <YoutubeIcon className="w-4 h-4" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Insert Horizontal Rule">
+            <button
+              onClick={() => editor.chain().focus().setHorizontalRule().run()}
+              className="p-2 rounded hover:bg-gray-100"
+            >
+              <MinusSquare className="w-4 h-4" />
+            </button>
+          </Tooltip>
         </div>
 
         {/* Formatting Tools */}
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
-          <button
-            onClick={() => editor.chain().focus().toggleHighlight().run()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              editor.isActive('highlight') ? 'bg-gray-100' : ''
-            }`}
-            title="Highlight"
-          >
-            <Highlighter className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
-            className="p-2 rounded hover:bg-gray-100"
-            title="Clear Formatting"
-          >
-            <Eraser className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* History */}
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
-          <button
-            onClick={() => editor.chain().focus().undo().run()}
-            disabled={!editor.can().undo()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              !editor.can().undo() ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-            title="Undo"
-          >
-            <Undo className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().redo().run()}
-            disabled={!editor.can().redo()}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              !editor.can().redo() ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-            title="Redo"
-          >
-            <Redo className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Right-aligned tools */}
-        <div className="flex items-center gap-2 ml-auto">
-          <button
-            onClick={() => setIsFullWidth(!isFullWidth)}
-            className="p-2 rounded hover:bg-gray-100"
-            title={isFullWidth ? "Narrow Width" : "Full Width"}
-          >
-            {isFullWidth ? (
-              <PanelLeftClose className="w-4 h-4" />
-            ) : (
-              <PanelLeftOpen className="w-4 h-4" />
-            )}
-          </button>
-
-          <button
-            onClick={() => setShowPreview(!showPreview)}
-            className={`p-2 rounded hover:bg-gray-100 ${
-              showPreview ? 'bg-gray-100' : ''
-            }`}
-            title="Preview"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-          
-          <button
-            onClick={() => setShowAIMenu(!showAIMenu)}
-            className={`p-2 rounded hover:bg-purple-100 ${
-              showAIMenu ? 'bg-purple-100' : ''
-            }`}
-            title="AI Writing Assistant"
-          >
-            <Wand2 className="w-4 h-4 text-purple-600" />
-          </button>
-
-          <button
-            onClick={clearContent}
-            className="p-2 rounded hover:bg-red-100"
-            title="Clear All Content"
-          >
-            <Trash2 className="w-4 h-4 text-red-600" />
-          </button>
-
-          <div className="relative group">
+        <div className="flex items-center gap-1">
+          <Tooltip text="Highlight">
             <button
-              className="p-2 rounded hover:bg-gray-100"
-              title="Export"
+              onClick={() => editor.chain().focus().toggleHighlight().run()}
+              className={`p-2 rounded hover:bg-gray-100 ${
+                editor.isActive('highlight') ? 'bg-gray-100' : ''
+              }`}
             >
-              <FileDown className="w-4 h-4" />
+              <Highlighter className="w-4 h-4" />
             </button>
-            <div className="absolute top-full right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 hidden group-hover:block z-50">
-              <button
-                onClick={() => handleExport('markdown')}
-                className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
-              >
-                Export as Markdown
-              </button>
-              <button
-                onClick={() => handleExport('html')}
-                className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
-              >
-                Export as HTML
-              </button>
-              <button
-                onClick={() => handleExport('text')}
-                className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
-              >
-                Export as Text
-              </button>
-            </div>
-          </div>
+          </Tooltip>
+          <Tooltip text="Clear Formatting">
+            <button
+              onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
+              className="p-2 rounded hover:bg-gray-100"
+            >
+              <Eraser className="w-4 h-4" />
+            </button>
+          </Tooltip>
         </div>
       </div>
     </div>
