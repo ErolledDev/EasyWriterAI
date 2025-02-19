@@ -17,6 +17,17 @@ import Underline from '@tiptap/extension-underline';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import FontFamily from '@tiptap/extension-font-family';
+import Document from '@tiptap/extension-document';
+import Paragraph from '@tiptap/extension-paragraph';
+import Text from '@tiptap/extension-text';
+import HardBreak from '@tiptap/extension-hard-break';
+import History from '@tiptap/extension-history';
+import Strike from '@tiptap/extension-strike';
+import ListItem from '@tiptap/extension-list-item';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
+import Mention from '@tiptap/extension-mention';
+import CharacterCount from '@tiptap/extension-character-count';
 import {
   Bold, Italic, List, ListOrdered, Quote, Redo, Strikethrough, Undo,
   Link as LinkIcon, Highlighter, Wand2, AlignLeft, AlignCenter, AlignRight,
@@ -26,21 +37,12 @@ import {
   Subscript as SubscriptIcon, Superscript as SuperscriptIcon,
   Code, CodeSquare, PanelLeftClose, PanelLeftOpen, Trash2,
   Copy, Scissors, Search, ZoomIn, ZoomOut, RotateCcw, Download,
-  FileUp, Printer, Share2, Lock, Unlock, Settings, HelpCircle
+  FileUp, Printer, Share2, Lock, Unlock, Settings, HelpCircle,
+  ListChecks, Hash, AtSign
 } from 'lucide-react';
 import { useState, useCallback, useRef } from 'react';
 import AIMenu from './AIMenu';
 import { convertToMarkdown, downloadFile } from '../lib/export';
-
-const FONT_SIZES = [
-  '8px', '9px', '10px', '11px', '12px', '14px', '16px', '18px', '20px', 
-  '22px', '24px', '26px', '28px', '36px', '48px', '72px'
-];
-
-const FONT_FAMILIES = [
-  'Arial', 'Times New Roman', 'Courier New', 'Georgia', 'Verdana',
-  'Helvetica', 'Tahoma', 'Trebuchet MS', 'Impact', 'Comic Sans MS'
-];
 
 const Tooltip = ({ children, text }: { children: React.ReactNode; text: string }) => {
   return (
@@ -117,8 +119,6 @@ const MenuBar = ({ editor }: { editor: any }) => {
       positions.push(match.index);
     }
 
-    // Highlight matches (you would need to implement this based on your needs)
-    // This is a simple example that could be enhanced
     editor.commands.unsetHighlight();
     positions.forEach(pos => {
       editor.commands.setTextSelection({ from: pos, to: pos + searchTerm.length });
@@ -653,12 +653,34 @@ const MenuBar = ({ editor }: { editor: any }) => {
   );
 };
 
-export default function Editor() {
+const FONT_SIZES = [
+  '8px', '9px', '10px', '11px', '12px', '14px', '16px', '18px', '20px', 
+  '22px', '24px', '26px', '28px', '36px', '48px', '72px'
+];
+
+const FONT_FAMILIES = [
+  'Arial', 'Times New Roman', 'Courier New', 'Georgia', 'Verdana',
+  'Helvetica', 'Tahoma', 'Trebuchet MS', 'Impact', 'Comic Sans MS'
+];
+
+const Editor = () => {
   const [showAIMenu, setShowAIMenu] = useState(false);
+  const [characterCount, setCharacterCount] = useState(0);
   
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      Document,
+      Paragraph,
+      Text,
+      HardBreak,
+      History,
+      StarterKit.configure({
+        document: false,
+        paragraph: false,
+        text: false,
+        hardBreak: false,
+        history: false,
+      }),
       Highlight,
       Link.configure({
         openOnClick: false,
@@ -694,6 +716,31 @@ export default function Editor() {
       Subscript,
       Superscript,
       FontFamily,
+      Strike,
+      ListItem,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
+      Mention.configure({
+        HTMLAttributes: {
+          class: 'mention',
+        },
+        suggestion: {
+          items: query => {
+            return [
+              'Sarah Johnson',
+              'Michael Brown',
+              'Emily Davis',
+              'David Wilson',
+              'Lisa Anderson',
+            ].filter(item => item.toLowerCase().startsWith(query.toLowerCase())).slice(0, 5);
+          },
+        },
+      }),
+      CharacterCount.configure({
+        limit: 10000,
+      }),
       Placeholder.configure({
         placeholder: 'Write something amazing...',
       }),
@@ -705,6 +752,9 @@ export default function Editor() {
           'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none p-4 min-h-[200px]',
       },
     },
+    onUpdate: ({ editor }) => {
+      setCharacterCount(editor.storage.characterCount.characters());
+    },
     onFocus: () => {
       setShowAIMenu(true);
     },
@@ -714,6 +764,17 @@ export default function Editor() {
     <div className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
       <MenuBar editor={editor} />
       <EditorContent editor={editor} />
+      <div className="px-4 py-2 border-t border-gray-200 flex justify-between items-center text-sm text-gray-500">
+        <div>
+          Characters: {characterCount}
+          {editor?.storage.characterCount.limit && (
+            <span> / {editor.storage.characterCount.limit()}</span>
+          )}
+        </div>
+        <div>
+          Words: {editor?.storage.characterCount.words()}
+        </div>
+      </div>
       <AIMenu
         editor={editor}
         isOpen={showAIMenu}
@@ -721,4 +782,6 @@ export default function Editor() {
       />
     </div>
   );
-}
+};
+
+export default Editor;

@@ -4,7 +4,8 @@
 
 /* Editor Styles */
 .ProseMirror {
-  @apply min-h-[300px] outline-none;
+  @apply min-h-[300px] outline-none bg-white text-gray-900 text-base leading-relaxed;
+  @apply p-6 sm:p-8;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
@@ -28,17 +29,17 @@
 
 .ProseMirror table td,
 .ProseMirror table th {
-  @apply border border-gray-300 p-2 relative;
+  @apply border border-gray-200 p-2 relative;
   min-width: 100px;
 }
 
 .ProseMirror table th {
-  @apply bg-gray-50 font-semibold;
+  @apply bg-gray-50 font-medium;
 }
 
 /* Code Block Styles */
 .ProseMirror pre {
-  @apply bg-gray-900 text-gray-100 p-4 rounded-lg my-4 overflow-x-auto;
+  @apply bg-gray-900 text-gray-100 p-4 rounded-md my-4 overflow-x-auto font-mono text-sm;
 }
 
 .ProseMirror code {
@@ -47,7 +48,7 @@
 
 /* Blockquote Styles */
 .ProseMirror blockquote {
-  @apply border-l-4 border-blue-500 pl-4 italic my-4 text-gray-700;
+  @apply border-l-2 border-gray-200 pl-4 italic my-4 text-gray-600;
 }
 
 /* List Styles */
@@ -59,37 +60,59 @@
   @apply list-decimal pl-6 my-4;
 }
 
+/* Task List Styles */
+.ProseMirror ul[data-type="taskList"] {
+  @apply list-none p-0;
+}
+
+.ProseMirror li[data-type="taskItem"] {
+  @apply flex items-start gap-2;
+}
+
+.ProseMirror li[data-type="taskItem"] > label {
+  @apply mt-1;
+}
+
+.ProseMirror li[data-type="taskItem"] > div {
+  @apply flex-1;
+}
+
+/* Mention Styles */
+.mention {
+  @apply bg-blue-50 text-blue-600 px-1 rounded-sm font-medium;
+}
+
 /* Image Styles */
 .ProseMirror img {
-  @apply max-w-full h-auto rounded-lg shadow-md my-4 mx-auto;
+  @apply max-w-full h-auto rounded-md shadow-sm my-4 mx-auto;
 }
 
 /* Link Styles */
 .ProseMirror a {
-  @apply text-blue-600 hover:text-blue-800 underline;
+  @apply text-blue-600 hover:text-blue-800 no-underline border-b border-blue-200 hover:border-blue-400 transition-colors;
 }
 
 /* Heading Styles */
 .ProseMirror h1 {
-  @apply text-4xl font-bold mb-4 mt-6;
+  @apply text-3xl font-semibold mb-4 mt-6 text-gray-900;
 }
 
 .ProseMirror h2 {
-  @apply text-3xl font-bold mb-3 mt-5;
+  @apply text-2xl font-semibold mb-3 mt-5 text-gray-900;
 }
 
 .ProseMirror h3 {
-  @apply text-2xl font-bold mb-3 mt-4;
+  @apply text-xl font-semibold mb-3 mt-4 text-gray-900;
 }
 
 /* Highlight Styles */
 .ProseMirror mark {
-  @apply bg-yellow-200 px-1 rounded;
+  @apply bg-yellow-100 px-1 rounded;
 }
 
 /* YouTube Embed Styles */
 .ProseMirror iframe {
-  @apply w-full aspect-video rounded-lg shadow-md my-4;
+  @apply w-full aspect-video rounded-md shadow-sm my-4;
 }
 
 /* Selection Styles */
@@ -99,7 +122,7 @@
 
 /* Focus Styles */
 .ProseMirror:focus {
-  @apply outline-none ring-2 ring-blue-200 ring-opacity-50;
+  @apply outline-none;
 }
 
 /* Placeholder Styles */
@@ -110,30 +133,30 @@
 
 /* Toolbar Button Styles */
 .toolbar-button {
-  @apply p-2 rounded-md transition-colors duration-200 ease-in-out;
-  @apply hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300;
+  @apply p-1.5 rounded-md transition-colors duration-200 ease-in-out;
+  @apply hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200;
   @apply active:bg-gray-200;
 }
 
 .toolbar-button.active {
-  @apply bg-blue-50 text-blue-600;
+  @apply bg-gray-100 text-blue-600;
 }
 
 /* Dropdown Menu Styles */
 .dropdown-menu {
-  @apply absolute z-50 mt-1 bg-white rounded-lg shadow-lg border border-gray-200;
+  @apply absolute z-50 mt-1 bg-white rounded-md shadow-lg border border-gray-200;
   @apply py-1 min-w-[160px] max-h-60 overflow-y-auto;
 }
 
 .dropdown-item {
-  @apply px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer;
+  @apply px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer;
   @apply flex items-center gap-2;
 }
 
 /* Search Input Styles */
 .search-input {
-  @apply px-3 py-1.5 text-sm border border-gray-300 rounded-md;
-  @apply focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-300;
+  @apply px-2 py-1 text-sm border border-gray-200 rounded-md;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300;
   @apply placeholder-gray-400;
 }
 
@@ -143,17 +166,17 @@
 }
 
 .zoom-button {
-  @apply p-1.5 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300;
+  @apply p-1.5 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200;
 }
 
 /* AI Menu Styles */
 .ai-menu {
-  @apply fixed right-8 top-32 w-64 bg-white rounded-lg shadow-xl border border-gray-200;
+  @apply fixed right-8 top-32 w-64 bg-white rounded-md shadow-lg border border-gray-200;
   @apply z-50 max-h-[80vh] overflow-hidden flex flex-col;
 }
 
 .ai-menu-header {
-  @apply p-3 border-b border-gray-200 flex items-center justify-between bg-purple-50;
+  @apply p-3 border-b border-gray-200 flex items-center justify-between bg-blue-50;
 }
 
 .ai-menu-content {
@@ -162,6 +185,23 @@
 
 .ai-action-button {
   @apply w-full text-left px-3 py-2 text-sm rounded transition-colors;
-  @apply hover:bg-purple-50 text-gray-700 hover:text-purple-700;
+  @apply hover:bg-gray-50 text-gray-700 hover:text-blue-600;
   @apply flex items-center gap-2;
+}
+
+/* Editor Container Styles */
+.editor-container {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+  @apply max-w-4xl mx-auto;
+}
+
+/* Toolbar Container Styles */
+.toolbar-container {
+  @apply border-b border-gray-200 bg-white sticky top-0 z-10;
+}
+
+/* Status Bar Styles */
+.status-bar {
+  @apply px-4 py-2 border-t border-gray-200 bg-gray-50;
+  @apply flex justify-between items-center text-sm text-gray-500;
 }
