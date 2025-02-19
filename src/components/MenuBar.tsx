@@ -10,20 +10,22 @@ import {
   Code, CodeSquare, PanelLeftClose, PanelLeftOpen, Trash2,
   Copy, Scissors, Search, ZoomIn, ZoomOut, RotateCcw, Download,
   FileUp, Printer, Share2, Lock, Unlock, Settings, HelpCircle,
-  ListChecks, Hash, AtSign, Moon, Sun
+  ListChecks, Hash, AtSign, Moon, Sun, UnderlineIcon as TextDecoration
 } from 'lucide-react';
 import { convertToMarkdown, downloadFile } from '../lib/export';
 import { useTheme } from '../context/ThemeContext';
 
 interface MenuBarProps {
   editor: Editor | null;
+  onToggleAI: () => void;
 }
 
-const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
+const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
   const [fontSize, setFontSize] = useState('16px');
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [zoom, setZoom] = useState(100);
+  const [showSettings, setShowSettings] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   if (!editor) {
@@ -88,6 +90,31 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
   const handleResetZoom = () => {
     setZoom(100);
     document.querySelector('.ProseMirror')?.style.setProperty('zoom', '100%');
+  };
+
+  const toggleLinkDecoration = () => {
+    const element = document.querySelector('.ProseMirror');
+    if (element) {
+      const links = element.querySelectorAll('a');
+      links.forEach(link => {
+        link.style.textDecoration = link.style.textDecoration === 'none' ? 'underline' : 'none';
+      });
+    }
+  };
+
+  const setMediaAlignment = (alignment: 'left' | 'center' | 'right') => {
+    const element = document.querySelector('.ProseMirror');
+    if (element) {
+      const media = element.querySelectorAll('img, iframe');
+      media.forEach(el => {
+        (el as HTMLElement).style.display = 'block';
+        (el as HTMLElement).style.margin = alignment === 'center' 
+          ? '0 auto' 
+          : alignment === 'right'
+          ? '0 0 0 auto'
+          : '0';
+      });
+    }
   };
 
   return (
@@ -434,6 +461,71 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
       </button>
 
       <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
+
+      {/* AI Menu Toggle */}
+      <button
+        onClick={onToggleAI}
+        className="toolbar-button"
+        title="Toggle AI Assistant"
+      >
+        <Wand2 className="w-5 h-5" />
+      </button>
+
+      {/* Settings Button */}
+      <button
+        onClick={() => setShowSettings(!showSettings)}
+        className={`toolbar-button ${showSettings ? 'active' : ''}`}
+        title="Settings"
+      >
+        <Settings className="w-5 h-5" />
+      </button>
+
+      {/* Settings Panel */}
+      {showSettings && (
+        <div className="absolute right-0 top-full mt-2 bg-white dark:bg-[#161B22] rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 min-w-[200px]">
+          <div className="space-y-4">
+            {/* Link Settings */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Link Settings</h3>
+              <button
+                onClick={toggleLinkDecoration}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full"
+              >
+                <TextDecoration className="w-4 h-4" />
+                Toggle Text Decoration
+              </button>
+            </div>
+
+            {/* Media Alignment */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Media Alignment</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setMediaAlignment('left')}
+                  className="toolbar-button"
+                  title="Align Left"
+                >
+                  <AlignLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setMediaAlignment('center')}
+                  className="toolbar-button"
+                  title="Align Center"
+                >
+                  <AlignCenter className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setMediaAlignment('right')}
+                  className="toolbar-button"
+                  title="Align Right"
+                >
+                  <AlignRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Theme Toggle */}
       <button

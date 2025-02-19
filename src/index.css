@@ -282,3 +282,41 @@
 .tiptap {
   @apply pt-[7.5rem];
 }
+
+/* Add new styles for settings panel */
+.settings-panel {
+  @apply absolute right-0 top-full mt-2 bg-white dark:bg-[#161B22] rounded-lg shadow-xl;
+  @apply border border-gray-200 dark:border-gray-700 p-4 min-w-[200px];
+  @apply animate-slideDown;
+}
+
+.settings-section {
+  @apply space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700 last:border-0 last:pb-0;
+}
+
+.settings-heading {
+  @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+}
+
+.settings-button {
+  @apply flex items-center gap-2 px-3 py-1.5 text-sm rounded-md;
+  @apply hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors;
+  @apply text-gray-700 dark:text-gray-300;
+  @apply w-full text-left;
+}
+
+/* Media alignment styles */
+.ProseMirror img.align-left,
+.ProseMirror iframe.align-left {
+  @apply float-left mr-4 mb-4;
+}
+
+.ProseMirror img.align-center,
+.ProseMirror iframe.align-center {
+  @apply mx-auto block;
+}
+
+.ProseMirror img.align-right,
+.ProseMirror iframe.align-right {
+  @apply float-right ml-4 mb-4;
+}

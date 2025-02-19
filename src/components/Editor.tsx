@@ -129,7 +129,7 @@ const Editor = () => {
 
   return (
     <div className="w-full bg-white dark:bg-[#1D1D1D] shadow-xl border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
-      <MenuBar editor={editor} />
+      <MenuBar editor={editor} onToggleAI={() => setShowAIMenu(!showAIMenu)} />
       <EditorContent editor={editor} />
       <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[#2D2D2D] sticky bottom-0 transition-colors duration-200">
         <div>
