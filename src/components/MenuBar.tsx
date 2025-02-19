@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Editor } from '@tiptap/react';
-import { Bold, Italic, List, ListOrdered, Quote, Redo, Strikethrough, Undo, Link as LinkIcon, Highlighter, Wand2, AlignLeft, AlignCenter, AlignRight, AlignJustify, Heading1, Heading2, Heading3, Table as TableIcon, Image as ImageIcon, Youtube as YoutubeIcon, FileDown, Palette, Type, Eraser, Eye, MinusSquare, Underline as UnderlineIcon, Subscript as SubscriptIcon, Superscript as SuperscriptIcon, Code, CodeSquare, PanelLeftClose, PanelLeftOpen, Trash2, Copy, Scissors, Search, ZoomIn, ZoomOut, RotateCcw, Download, FileUp, Printer, Share2, Lock, Unlock, Settings, HelpCircle, ListChecks, Hash, AtSign, Moon, Sun, UnderlineIcon as TextDecoration, FileText, FileJson, File as FilePdf } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered, Quote, Redo, Strikethrough, Undo, Link as LinkIcon, Highlighter, Wand2, AlignLeft, AlignCenter, AlignRight, AlignJustify, Heading1, Heading2, Heading3, Table as TableIcon, Image as ImageIcon, Youtube as YoutubeIcon, FileDown, Palette, Type, Eraser, Eye, MinusSquare, Underline as UnderlineIcon, Subscript as SubscriptIcon, Superscript as SuperscriptIcon, Code, CodeSquare, PanelLeftClose, PanelLeftOpen, Trash2, Copy, Scissors, Search, ZoomIn, ZoomOut, RotateCcw, Download, FileUp, Printer, Share2, Lock, Unlock, Settings, HelpCircle, ListChecks, Hash, AtSign, Moon, Sun, UnderlineIcon as TextDecoration, FileText, FileJson, File as FilePdf, X, AlertCircle } from 'lucide-react';
 import { downloadFile, ExportFormat } from '../lib/export';
 import { useTheme } from '../context/ThemeContext';
 
@@ -16,8 +16,13 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
   const [zoom, setZoom] = useState(100);
   const [showSettings, setShowSettings] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [showAlert, setShowAlert] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const exportButtonRef = useRef<HTMLButtonElement>(null);
+  const linkInputRef = useRef<HTMLInputElement>(null);
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -35,9 +40,23 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (showLinkInput && linkInputRef.current) {
+      linkInputRef.current.focus();
+    }
+  }, [showLinkInput]);
+
+  useEffect(() => {
+    if (showAlert) {
+      const timer = setTimeout(() => setShowAlert(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showAlert]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       setShowExportMenu(false);
+      setShowLinkInput(false);
       exportButtonRef.current?.focus();
     }
   };
@@ -46,6 +65,10 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
     return null;
   }
 
+  const showNotification = (message: string, type: 'success' | 'error') => {
+    setShowAlert({ message, type });
+  };
+
   const handleFontSizeChange = (size: string) => {
     setFontSize(size);
     editor.chain().focus().setFontSize(size).run();
@@ -53,13 +76,105 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
 
   const handleCopy = () => {
     const content = editor.getHTML();
-    navigator.clipboard.writeText(content);
+    navigator.clipboard.writeText(content).then(() => {
+      showNotification('Content copied to clipboard', 'success');
+    }).catch(() => {
+      showNotification('Failed to copy content', 'error');
+    });
   };
 
   const handleCut = () => {
     const content = editor.getHTML();
-    navigator.clipboard.writeText(content);
-    editor.commands.deleteSelection();
+    navigator.clipboard.writeText(content).then(() => {
+      editor.commands.deleteSelection();
+      showNotification('Content cut to clipboard', 'success');
+    }).catch(() => {
+      showNotification('Failed to cut content', 'error');
+    });
+  };
+
+  const handleLink = () => {
+    const previousUrl = editor.getAttributes('link').href;
+    setLinkUrl(previousUrl || '');
+    setShowLinkInput(true);
+  };
+
+  const applyLink = () => {
+    if (linkUrl) {
+      editor.chain().focus().setLink({ href: linkUrl }).run();
+      showNotification('Link added successfully', 'success');
+    } else {
+      editor.chain().focus().unsetLink().run();
+    }
+    setShowLinkInput(false);
+    setLinkUrl('');
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        showNotification('Please select an image file', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          const maxWidth = 800;
+
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+
+          editor.chain().focus().setImage({
+            src: e.target?.result as string,
+            width,
+            height,
+          }).run();
+          showNotification('Image added successfully', 'success');
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleYoutubeEmbed = () => {
+    const url = window.prompt('Enter the YouTube video URL:');
+    if (url) {
+      try {
+        const videoId = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1];
+        if (videoId) {
+          editor.chain().focus().setYoutubeVideo({
+            src: `https://www.youtube.com/embed/${videoId}`,
+            width: 640,
+            height: 480,
+          }).run();
+          showNotification('YouTube video added successfully', 'success');
+        } else {
+          showNotification('Invalid YouTube URL', 'error');
+        }
+      } catch (error) {
+        showNotification('Failed to add YouTube video', 'error');
+      }
+    }
+  };
+
+  const handleTableInsert = () => {
+    const rows = parseInt(window.prompt('Number of rows:', '3') || '3');
+    const cols = parseInt(window.prompt('Number of columns:', '3') || '3');
+    
+    if (!isNaN(rows) && !isNaN(cols) && rows > 0 && cols > 0) {
+      editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
+      showNotification('Table inserted successfully', 'success');
+    } else {
+      showNotification('Invalid table dimensions', 'error');
+    }
   };
 
   const handleDownload = async (format: ExportFormat) => {
@@ -69,7 +184,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
         : editor.getHTML();
         
       if (!content) {
-        console.error('No content to export');
+        showNotification('No content to export', 'error');
         return;
       }
 
@@ -78,8 +193,9 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
       
       await downloadFile(content, filename, format);
       setShowExportMenu(false);
+      showNotification(`Document exported as ${format.toUpperCase()}`, 'success');
     } catch (error) {
-      console.error('Export error:', error);
+      showNotification(`Failed to export as ${format.toUpperCase()}`, 'error');
     }
   };
 
@@ -92,10 +208,48 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
           <head>
             <title>Print Document</title>
             <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
-              img { max-width: 100%; height: auto; }
-              pre { background: #f5f5f5; padding: 15px; border-radius: 5px; }
-              blockquote { border-left: 3px solid #ccc; margin: 0; padding-left: 15px; }
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                line-height: 1.6;
+                padding: 40px;
+                max-width: 800px;
+                margin: 0 auto;
+              }
+              img {
+                max-width: 100%;
+                height: auto;
+                display: block;
+                margin: 2rem auto;
+              }
+              pre {
+                background: #f5f5f5;
+                padding: 15px;
+                border-radius: 5px;
+                overflow-x: auto;
+              }
+              blockquote {
+                border-left: 3px solid #ccc;
+                margin: 0;
+                padding-left: 15px;
+                color: #666;
+              }
+              table {
+                border-collapse: collapse;
+                width: 100%;
+                margin: 1rem 0;
+              }
+              th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+              }
+              th {
+                background-color: #f5f5f5;
+              }
+              @media print {
+                body { padding: 0; }
+                @page { margin: 2cm; }
+              }
             </style>
           </head>
           <body>${content}</body>
@@ -121,28 +275,25 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
     document.querySelector('.ProseMirror')?.style.setProperty('zoom', '100%');
   };
 
-  const toggleLinkDecoration = () => {
-    const element = document.querySelector('.ProseMirror');
-    if (element) {
-      const links = element.querySelectorAll('a');
-      links.forEach(link => {
-        link.style.textDecoration = link.style.textDecoration === 'none' ? 'underline' : 'none';
-      });
-    }
-  };
+  const handleSearch = () => {
+    if (!searchQuery) return;
 
-  const setMediaAlignment = (alignment: 'left' | 'center' | 'right') => {
     const element = document.querySelector('.ProseMirror');
-    if (element) {
-      const media = element.querySelectorAll('img, iframe');
-      media.forEach(el => {
-        (el as HTMLElement).style.display = 'block';
-        (el as HTMLElement).style.margin = alignment === 'center' 
-          ? '0 auto' 
-          : alignment === 'right'
-          ? '0 0 0 auto'
-          : '0';
-      });
+    if (!element) return;
+
+    const text = element.textContent || '';
+    const searchRegex = new RegExp(searchQuery, 'gi');
+    const matches = text.match(searchRegex);
+
+    if (matches) {
+      showNotification(`Found ${matches.length} matches`, 'success');
+      // Highlight matches
+      const range = window.getSelection()?.getRangeAt(0);
+      if (range) {
+        range.collapse(true);
+      }
+    } else {
+      showNotification('No matches found', 'error');
     }
   };
 
@@ -152,14 +303,14 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
       <button
         onClick={() => editor.chain().focus().toggleBold().run()}
         className={`toolbar-button ${editor.isActive('bold') ? 'active' : ''}`}
-        title="Bold"
+        title="Bold (Ctrl+B)"
       >
         <Bold className="w-5 h-5" />
       </button>
       <button
         onClick={() => editor.chain().focus().toggleItalic().run()}
         className={`toolbar-button ${editor.isActive('italic') ? 'active' : ''}`}
-        title="Italic"
+        title="Italic (Ctrl+I)"
       >
         <Italic className="w-5 h-5" />
       </button>
@@ -173,23 +324,9 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
       <button
         onClick={() => editor.chain().focus().toggleUnderline().run()}
         className={`toolbar-button ${editor.isActive('underline') ? 'active' : ''}`}
-        title="Underline"
+        title="Underline (Ctrl+U)"
       >
         <UnderlineIcon className="w-5 h-5" />
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleSubscript().run()}
-        className={`toolbar-button ${editor.isActive('subscript') ? 'active' : ''}`}
-        title="Subscript"
-      >
-        <SubscriptIcon className="w-5 h-5" />
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleSuperscript().run()}
-        className={`toolbar-button ${editor.isActive('superscript') ? 'active' : ''}`}
-        title="Superscript"
-      >
-        <SuperscriptIcon className="w-5 h-5" />
       </button>
       
       <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
@@ -201,14 +338,9 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
         className="toolbar-button bg-transparent text-gray-700 dark:text-gray-300"
         title="Font Size"
       >
-        <option value="12px">12px</option>
-        <option value="14px">14px</option>
-        <option value="16px">16px</option>
-        <option value="18px">18px</option>
-        <option value="20px">20px</option>
-        <option value="24px">24px</option>
-        <option value="28px">28px</option>
-        <option value="32px">32px</option>
+        {[12, 14, 16, 18, 20, 24, 28, 32].map(size => (
+          <option key={size} value={`${size}px`}>{size}px</option>
+        ))}
       </select>
       
       <button
@@ -330,76 +462,64 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
         <Quote className="w-5 h-5" />
       </button>
       <button
-        onClick={() => {
-          const url = window.prompt('Enter the link URL:');
-          if (url) {
-            editor.chain().focus().setLink({ href: url }).run();
-          }
-        }}
+        onClick={handleLink}
         className={`toolbar-button ${editor.isActive('link') ? 'active' : ''}`}
         title="Add Link"
       >
         <LinkIcon className="w-5 h-5" />
       </button>
-      <button
-        onClick={() => {
-          const url = window.prompt('Enter the image URL:');
-          if (url) {
-            editor.chain().focus().setImage({ src: url }).run();
-          }
-        }}
-        className="toolbar-button"
-        title="Add Image"
-      >
+      
+      {/* Link Input Dialog */}
+      {showLinkInput && (
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 p-4 bg-white dark:bg-[#161B22] rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50">
+          <div className="flex items-center gap-2">
+            <input
+              ref={linkInputRef}
+              type="url"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              placeholder="Enter URL"
+              className="px-3 bg-white py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-[#0D1117] dark:text-gray-100"
+              onKeyDown={(e) => e.key === 'Enter' && applyLink()}
+            />
+            <button
+              onClick={applyLink}
+              className="px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            >
+              Apply
+            </button>
+            <button
+              onClick={() => setShowLinkInput(false)}
+              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
+      
+      <label className="toolbar-button cursor-pointer" title="Add Image">
         <ImageIcon className="w-5 h-5" />
-      </button>
+        <input
+          type="file"
+          className="hidden"
+          accept="image/*"
+          onChange={handleImageUpload}
+        />
+      </label>
       <button
-        onClick={() => {
-          const url = window.prompt('Enter the YouTube video URL:');
-          if (url) {
-            editor.chain().focus().setYoutubeVideo({ src: url }).run();
-          }
-        }}
+        onClick={handleYoutubeEmbed}
         className="toolbar-button"
         title="Add YouTube Video"
       >
         <YoutubeIcon className="w-5 h-5" />
       </button>
       <button
-        onClick={() => {
-          const rows = parseInt(window.prompt('Number of rows:', '3') || '3');
-          const cols = parseInt(window.prompt('Number of columns:', '3') || '3');
-          
-          editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
-        }}
+        onClick={handleTableInsert}
         className="toolbar-button"
         title="Insert Table"
       >
         <TableIcon className="w-5 h-5" />
-      </button>
-      <button
-        onClick={() => {
-          const tag = window.prompt('Enter mention name:');
-          if (tag) {
-            editor.chain().focus().insertContent(`@${tag}`).run();
-          }
-        }}
-        className="toolbar-button"
-        title="Add Mention"
-      >
-        <AtSign className="w-5 h-5" />
-      </button>
-      <button
-        onClick={() => {
-          const tag = window.prompt('Enter hashtag:');
-          if (tag) {
-            editor.chain().focus().insertContent(`#${tag}`).run();
-          }
-        }}
-        className="toolbar-button"
-        title="Add Hashtag"
-      >
-        <Hash className="w-5 h-5" />
       </button>
       
       <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
@@ -441,13 +561,23 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
         <Search className="w-5 h-5" />
       </button>
       {showSearch && (
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search..."
-          className="search-input"
-        />
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            placeholder="Search..."
+            className="px-3 bg-white py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-[#0D1117] dark:text-gray-100"
+          />
+          <button
+            onClick={handleSearch}
+            className="toolbar-button"
+            title="Find"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+        </div>
       )}
       <button onClick={handleZoomIn} className="toolbar-button" title="Zoom In">
         <ZoomIn className="w-5 h-5" />
@@ -533,7 +663,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
       <button
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().undo()}
-        className="toolbar-button"
+        className="toolbar-button disabled:opacity-50 disabled:cursor-not-allowed"
         title="Undo"
       >
         <Undo className="w-5 h-5" />
@@ -541,7 +671,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
       <button
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().redo()}
-        className="toolbar-button"
+        className="toolbar-button disabled:opacity-50 disabled:cursor-not-allowed"
         title="Redo"
       >
         <Redo className="w-5 h-5" />
@@ -558,62 +688,6 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
         <Wand2 className="w-5 h-5" />
       </button>
 
-      {/* Settings Button */}
-      <button
-        onClick={() => setShowSettings(!showSettings)}
-        className={`toolbar-button ${showSettings ? 'active' : ''}`}
-        title="Settings"
-      >
-        <Settings className="w-5 h-5" />
-      </button>
-
-      {/* Settings Panel */}
-      {showSettings && (
-        <div className="absolute right-0 top-full mt-2 bg-white dark:bg-[#161B22] rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 min-w-[200px]">
-          <div className="space-y-4">
-            {/* Link Settings */}
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Link Settings</h3>
-              <button
-                onClick={toggleLinkDecoration}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full"
-              >
-                <TextDecoration className="w-4 h-4" />
-                Toggle Text Decoration
-              </button>
-            </div>
-
-            {/* Media Alignment */}
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Media Alignment</h3>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setMediaAlignment('left')}
-                  className="toolbar-button"
-                  title="Align Left"
-                >
-                  <AlignLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setMediaAlignment('center')}
-                  className="toolbar-button"
-                  title="Align Center"
-                >
-                  <AlignCenter className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setMediaAlignment('right')}
-                  className="toolbar-button"
-                  title="Align Right"
-                >
-                  <AlignRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Theme Toggle */}
       <button
         onClick={toggleTheme}
@@ -626,6 +700,26 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
           <Moon className="w-5 h-5" />
         )}
       </button>
+
+      {/* Notification */}
+      {showAlert && (
+        <div
+          className={`fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transition-all duration-300 ${
+            showAlert.type === 'success'
+              ? 'bg-green-500 text-white'
+              : 'bg-red-500 text-white'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {showAlert.type === 'success' ? (
+              <div className="w-4 h-4 text-white" />
+            ) : (
+              <AlertCircle className="w-4 h-4" />
+            )}
+            <span>{showAlert.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

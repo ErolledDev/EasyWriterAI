@@ -38,10 +38,10 @@ async function convertImageToBase64(imageUrl: string): Promise<string> {
   }
 }
 
-// Add image compression function
+// Add image compression function with improved quality
 async function compressImage(imageElement: HTMLImageElement): Promise<string> {
-  const maxWidth = 1200; // Maximum width for images
-  const quality = 0.7; // Image quality (0.1 to 1.0)
+  const maxWidth = 800; // Optimal width for PDF documents
+  const quality = 0.85; // Increased quality for better resolution
 
   // Create a new image to handle cross-origin images
   const img = new Image();
@@ -78,6 +78,10 @@ async function compressImage(imageElement: HTMLImageElement): Promise<string> {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Could not get canvas context');
 
+    // Apply image smoothing for better quality
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
     // Draw and compress image
     ctx.drawImage(img, 0, 0, width, height);
     return canvas.toDataURL('image/jpeg', quality);
@@ -112,19 +116,28 @@ export async function convertToPDF(editorElement: HTMLElement): Promise<Blob> {
         // Convert and compress image
         const compressedDataUrl = await compressImage(img);
         img.src = compressedDataUrl;
+        
+        // Apply optimal styling for PDF
+        img.style.display = 'block';
+        img.style.margin = '2rem auto';
+        img.style.height = 'auto';
+        img.style.maxWidth = '500px';
+        img.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+        img.style.borderRadius = '6px';
       } catch (error) {
         console.error('Error processing image:', error);
-        // Continue with other images if one fails
         continue;
       }
     }
 
-    // Add margins and styling
-    clone.style.padding = '40px';
+    // Enhanced styling for PDF
+    clone.style.padding = '48px';
     clone.style.background = 'white';
     clone.style.color = '#1a1a1a';
+    clone.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+    clone.style.lineHeight = '1.6';
 
-    // Fix heading colors
+    // Enhance heading styles
     const headings = clone.querySelectorAll('h1, h2, h3, h4, h5, h6');
     headings.forEach(heading => {
       heading.style.color = '#1a1a1a';
@@ -132,32 +145,68 @@ export async function convertToPDF(editorElement: HTMLElement): Promise<Blob> {
       heading.style.backgroundClip = 'initial';
       heading.style.webkitBackgroundClip = 'initial';
       heading.style.webkitTextFillColor = 'initial';
+      heading.style.marginBottom = '1rem';
+      heading.style.fontWeight = 'bold';
     });
 
-    // Ensure links are visible
+    // Enhance link styles
     const links = clone.querySelectorAll('a');
     links.forEach(link => {
       link.style.color = '#2563eb';
       link.style.textDecoration = 'underline';
     });
 
-    // Ensure all text is visible
+    // Enhance text styles
     const allText = clone.querySelectorAll('p, span, li, td, th, blockquote');
     allText.forEach(element => {
       (element as HTMLElement).style.color = '#1a1a1a';
+      (element as HTMLElement).style.marginBottom = '1rem';
+    });
+
+    // Enhance code blocks
+    const codeBlocks = clone.querySelectorAll('pre, code');
+    codeBlocks.forEach(block => {
+      (block as HTMLElement).style.backgroundColor = '#f8f9fa';
+      (block as HTMLElement).style.padding = '1rem';
+      (block as HTMLElement).style.borderRadius = '4px';
+      (block as HTMLElement).style.fontFamily = 'Monaco, Consolas, "Liberation Mono", monospace';
+      (block as HTMLElement).style.fontSize = '0.9em';
+    });
+
+    // Enhance tables
+    const tables = clone.querySelectorAll('table');
+    tables.forEach(table => {
+      table.style.borderCollapse = 'collapse';
+      table.style.width = '100%';
+      table.style.marginBottom = '1.5rem';
+      
+      const cells = table.querySelectorAll('td, th');
+      cells.forEach(cell => {
+        (cell as HTMLElement).style.border = '1px solid #e2e8f0';
+        (cell as HTMLElement).style.padding = '0.75rem';
+      });
     });
 
     // Capture with optimized settings
     const canvas = await html2canvas(clone, {
-      scale: 1.5, // Reduced from 2 to optimize size
+      scale: 2, // Higher scale for better quality
       useCORS: true,
       allowTaint: false,
       logging: false,
       backgroundColor: 'white',
-      imageTimeout: 15000, // Increased timeout for image processing
+      imageTimeout: 15000,
+      onclone: (clonedDoc) => {
+        // Additional styling for the cloned document
+        const style = clonedDoc.createElement('style');
+        style.innerHTML = `
+          * { -webkit-print-color-adjust: exact !important; }
+          @page { margin: 0; }
+        `;
+        clonedDoc.head.appendChild(style);
+      }
     });
 
-    // Calculate PDF dimensions
+    // Calculate PDF dimensions (A4)
     const imgWidth = 595.28; // A4 width in points
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
@@ -165,11 +214,13 @@ export async function convertToPDF(editorElement: HTMLElement): Promise<Blob> {
       orientation: imgHeight > imgWidth ? 'p' : 'l',
       unit: 'pt',
       format: [imgWidth, imgHeight],
-      compress: true, // Enable PDF compression
+      compress: true,
+      hotfixes: ['px_scaling']
     });
 
-    const imgData = canvas.toDataURL('image/jpeg', 0.7); // Use JPEG with compression
-    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+    // Add image with improved quality
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
 
     return pdf.output('blob');
   } catch (error) {
