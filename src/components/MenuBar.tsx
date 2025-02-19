@@ -1,18 +1,7 @@
 import React, { useState } from 'react';
 import { Editor } from '@tiptap/react';
-import {
-  Bold, Italic, List, ListOrdered, Quote, Redo, Strikethrough, Undo,
-  Link as LinkIcon, Highlighter, Wand2, AlignLeft, AlignCenter, AlignRight,
-  AlignJustify, Heading1, Heading2, Heading3, Table as TableIcon,
-  Image as ImageIcon, Youtube as YoutubeIcon, FileDown, Palette, Type,
-  Eraser, Eye, MinusSquare, Underline as UnderlineIcon,
-  Subscript as SubscriptIcon, Superscript as SuperscriptIcon,
-  Code, CodeSquare, PanelLeftClose, PanelLeftOpen, Trash2,
-  Copy, Scissors, Search, ZoomIn, ZoomOut, RotateCcw, Download,
-  FileUp, Printer, Share2, Lock, Unlock, Settings, HelpCircle,
-  ListChecks, Hash, AtSign, Moon, Sun, UnderlineIcon as TextDecoration
-} from 'lucide-react';
-import { convertToMarkdown, downloadFile } from '../lib/export';
+import { Bold, Italic, List, ListOrdered, Quote, Redo, Strikethrough, Undo, Link as LinkIcon, Highlighter, Wand2, AlignLeft, AlignCenter, AlignRight, AlignJustify, Heading1, Heading2, Heading3, Table as TableIcon, Image as ImageIcon, Youtube as YoutubeIcon, FileDown, Palette, Type, Eraser, Eye, MinusSquare, Underline as UnderlineIcon, Subscript as SubscriptIcon, Superscript as SuperscriptIcon, Code, CodeSquare, PanelLeftClose, PanelLeftOpen, Trash2, Copy, Scissors, Search, ZoomIn, ZoomOut, RotateCcw, Download, FileUp, Printer, Share2, Lock, Unlock, Settings, HelpCircle, ListChecks, Hash, AtSign, Moon, Sun, UnderlineIcon as TextDecoration, FileText, FileJson, File as FilePdf } from 'lucide-react';
+import { downloadFile, ExportFormat } from '../lib/export';
 import { useTheme } from '../context/ThemeContext';
 
 interface MenuBarProps {
@@ -48,10 +37,24 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
     editor.commands.deleteSelection();
   };
 
-  const handleDownload = () => {
-    const content = editor.getHTML();
-    const markdown = convertToMarkdown(content);
-    downloadFile(markdown, 'document.md');
+  const handleDownload = async (format: ExportFormat) => {
+    try {
+      const content = format === 'pdf' 
+        ? document.querySelector('.ProseMirror') as HTMLElement 
+        : editor.getHTML();
+        
+      if (!content) {
+        console.error('No content to export');
+        return;
+      }
+
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `document_${timestamp}`;
+      
+      await downloadFile(content, filename, format);
+    } catch (error) {
+      console.error('Export error:', error);
+    }
   };
 
   const handlePrint = () => {
@@ -432,10 +435,46 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
       
       <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
-      {/* File Operations */}
-      <button onClick={handleDownload} className="toolbar-button" title="Download">
-        <Download className="w-5 h-5" />
-      </button>
+      {/* Export */}
+      <div className="relative group">
+        <button
+          className="toolbar-button"
+          title="Export"
+        >
+          <FileDown className="w-5 h-5" />
+        </button>
+        <div className="absolute right-0 mt-2 py-2 w-48 bg-white dark:bg-[#161B22] rounded-md shadow-xl border border-gray-200 dark:border-gray-700 hidden group-hover:block">
+          <button
+            onClick={() => handleDownload('markdown')}
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+          >
+            <FileText className="w-4 h-4" />
+            Markdown (.md)
+          </button>
+          <button
+            onClick={() => handleDownload('html')}
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+          >
+            <FileJson className="w-4 h-4" />
+            HTML (.html)
+          </button>
+          <button
+            onClick={() => handleDownload('txt')}
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+          >
+            <FileText className="w-4 h-4" />
+            Plain Text (.txt)
+          </button>
+          <button
+            onClick={() => handleDownload('pdf')}
+            className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+          >
+            <FilePdf className="w-4 h-4" />
+            PDF (.pdf)
+          </button>
+        </div>
+      </div>
+      
       <button onClick={handlePrint} className="toolbar-button" title="Print">
         <Printer className="w-5 h-5" />
       </button>
