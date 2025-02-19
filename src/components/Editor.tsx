@@ -34,7 +34,7 @@ import AIMenu from './AIMenu';
 import MenuBar from './MenuBar';
 
 const Editor = () => {
-  const [showAIMenu, setShowAIMenu] = useState(false);
+  const [showAIMenu, setShowAIMenu] = useState(true);
   const [characterCount, setCharacterCount] = useState(0);
   
   const editor = useEditor({
@@ -119,22 +119,19 @@ const Editor = () => {
     editorProps: {
       attributes: {
         class:
-          'prose prose-invert prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none p-8 min-h-[calc(100vh-13rem)]',
+          'prose prose-invert prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none p-8 min-h-[calc(100vh-13rem)] bg-white dark:bg-[#0D1117] text-gray-900 dark:text-gray-100 transition-colors duration-200',
       },
     },
     onUpdate: ({ editor }) => {
       setCharacterCount(editor.storage.characterCount.characters());
     },
-    onFocus: () => {
-      setShowAIMenu(true);
-    },
   });
 
   return (
-    <div className="w-full bg-[#1D1D1D] shadow-xl border-t border-gray-700">
+    <div className="w-full bg-white dark:bg-[#1D1D1D] shadow-xl border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
       <MenuBar editor={editor} />
       <EditorContent editor={editor} />
-      <div className="px-4 py-2 border-t border-gray-700 flex justify-between items-center text-sm text-gray-400 bg-[#2D2D2D] sticky bottom-0">
+      <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[#2D2D2D] sticky bottom-0 transition-colors duration-200">
         <div>
           Characters: {characterCount}
           {editor?.storage.characterCount.limit && (

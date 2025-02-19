@@ -89,7 +89,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
   };
 
   return (
-    <div className="sticky top-0 z-50 bg-[#0D1117] border-b border-gray-800 p-2 flex flex-wrap gap-1 items-center backdrop-blur-sm bg-opacity-95">
+    <div className="sticky top-0 z-50 bg-white dark:bg-[#0D1117] border-b border-gray-200 dark:border-gray-800 p-2 flex flex-wrap gap-1 items-center backdrop-blur-sm bg-opacity-95 transition-colors duration-200">
       {/* Text Formatting */}
       <button
         onClick={() => editor.chain().focus().toggleBold().run()}
@@ -134,13 +134,13 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         <SuperscriptIcon className="w-5 h-5" />
       </button>
       
-      <div className="w-px h-6 bg-gray-700 mx-1" />
+      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
       {/* Font Controls */}
       <select
         value={fontSize}
         onChange={(e) => handleFontSizeChange(e.target.value)}
-        className="toolbar-button bg-transparent text-gray-300"
+        className="toolbar-button bg-transparent text-gray-700 dark:text-gray-300"
         title="Font Size"
       >
         <option value="12px">12px</option>
@@ -161,7 +161,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         <Type className="w-5 h-5" />
       </button>
       
-      <div className="w-px h-6 bg-gray-700 mx-1" />
+      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
       {/* Headings */}
       <button
@@ -186,7 +186,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         <Heading3 className="w-5 h-5" />
       </button>
       
-      <div className="w-px h-6 bg-gray-700 mx-1" />
+      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
       {/* Lists */}
       <button
@@ -211,7 +211,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         <ListChecks className="w-5 h-5" />
       </button>
       
-      <div className="w-px h-6 bg-gray-700 mx-1" />
+      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
       {/* Alignment */}
       <button
@@ -243,7 +243,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         <AlignJustify className="w-5 h-5" />
       </button>
       
-      <div className="w-px h-6 bg-gray-700 mx-1" />
+      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
       {/* Code */}
       <button
@@ -261,7 +261,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         <CodeSquare className="w-5 h-5" />
       </button>
       
-      <div className="w-px h-6 bg-gray-700 mx-1" />
+      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
       {/* Insert */}
       <button
@@ -344,7 +344,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         <Hash className="w-5 h-5" />
       </button>
       
-      <div className="w-px h-6 bg-gray-700 mx-1" />
+      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
       {/* Formatting */}
       <button
@@ -362,7 +362,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         <Eraser className="w-5 h-5" />
       </button>
       
-      <div className="w-px h-6 bg-gray-700 mx-1" />
+      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
       {/* Clipboard */}
       <button onClick={handleCopy} className="toolbar-button" title="Copy">
@@ -372,7 +372,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         <Scissors className="w-5 h-5" />
       </button>
       
-      <div className="w-px h-6 bg-gray-700 mx-1" />
+      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
       {/* View Controls */}
       <button
@@ -401,7 +401,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         <RotateCcw className="w-5 h-5" />
       </button>
       
-      <div className="w-px h-6 bg-gray-700 mx-1" />
+      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
       {/* File Operations */}
       <button onClick={handleDownload} className="toolbar-button" title="Download">
@@ -411,7 +411,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         <Printer className="w-5 h-5" />
       </button>
       
-      <div className="w-px h-6 bg-gray-700 mx-1" />
+      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
       {/* History */}
       <button

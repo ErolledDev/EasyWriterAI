@@ -2,22 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+}
+
 /* Scrollbar Styles */
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+  @apply bg-gray-100/20 dark:bg-black/20;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(167, 139, 250, 0.4);
+  @apply bg-purple-500/40;
   border-radius: 2px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(167, 139, 250, 0.6);
+  @apply bg-purple-500/60;
 }
 
 /* Animation */
@@ -38,12 +44,12 @@
 
 /* Editor Styles */
 .ProseMirror {
-  @apply min-h-[calc(100vh-13rem)] outline-none bg-[#0D1117] text-gray-100 text-base leading-relaxed;
+  @apply min-h-[calc(100vh-13rem)] outline-none bg-white dark:bg-[#0D1117] text-gray-900 dark:text-gray-100 text-base leading-relaxed transition-colors duration-200;
   @apply p-8;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
-  @apply text-gray-500 float-left h-0 pointer-events-none;
+  @apply text-gray-400 dark:text-gray-500 float-left h-0 pointer-events-none;
   content: attr(data-placeholder);
 }
 
@@ -54,38 +60,38 @@
 
 .ProseMirror table td,
 .ProseMirror table th {
-  @apply border border-gray-800 p-2 relative;
+  @apply border border-gray-200 dark:border-gray-800 p-2 relative transition-colors duration-200;
   min-width: 100px;
 }
 
 .ProseMirror table th {
-  @apply bg-[#161B22] font-medium text-gray-200;
+  @apply bg-gray-50 dark:bg-[#161B22] font-medium text-gray-700 dark:text-gray-200 transition-colors duration-200;
 }
 
 /* Code Block Styles */
 .ProseMirror pre {
-  @apply bg-[#161B22] text-gray-100 p-4 rounded-md my-4 overflow-x-auto font-mono text-sm;
-  @apply border border-gray-800;
+  @apply bg-gray-50 dark:bg-[#161B22] text-gray-900 dark:text-gray-100 p-4 rounded-md my-4 overflow-x-auto font-mono text-sm transition-colors duration-200;
+  @apply border border-gray-200 dark:border-gray-800;
 }
 
 .ProseMirror code {
-  @apply bg-[#161B22] text-gray-100 px-1.5 py-0.5 rounded text-sm font-mono;
-  @apply border border-gray-800;
+  @apply bg-gray-50 dark:bg-[#161B22] text-gray-900 dark:text-gray-100 px-1.5 py-0.5 rounded text-sm font-mono transition-colors duration-200;
+  @apply border border-gray-200 dark:border-gray-800;
 }
 
 /* Blockquote Styles */
 .ProseMirror blockquote {
-  @apply border-l-2 border-purple-500 pl-4 italic my-4 text-gray-200;
-  @apply bg-[#161B22] p-4 rounded-r-md;
+  @apply border-l-2 border-purple-500 pl-4 italic my-4 text-gray-700 dark:text-gray-200 transition-colors duration-200;
+  @apply bg-gray-50 dark:bg-[#161B22] p-4 rounded-r-md;
 }
 
 /* List Styles */
 .ProseMirror ul {
-  @apply list-disc pl-6 my-4 text-gray-200;
+  @apply list-disc pl-6 my-4 text-gray-700 dark:text-gray-200 transition-colors duration-200;
 }
 
 .ProseMirror ol {
-  @apply list-decimal pl-6 my-4 text-gray-200;
+  @apply list-decimal pl-6 my-4 text-gray-700 dark:text-gray-200 transition-colors duration-200;
 }
 
 /* Task List Styles */
@@ -107,52 +113,52 @@
 
 /* Mention Styles */
 .mention {
-  @apply bg-[#161B22] text-purple-400 px-2 py-0.5 rounded-md font-medium;
-  @apply border border-purple-500/20;
+  @apply bg-gray-100 dark:bg-[#161B22] text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-md font-medium transition-colors duration-200;
+  @apply border border-purple-200 dark:border-purple-500/20;
 }
 
 /* Image Styles */
 .ProseMirror img {
-  @apply max-w-full h-auto rounded-md shadow-lg my-4 mx-auto;
-  @apply border border-gray-800;
+  @apply max-w-full h-auto rounded-md shadow-lg my-4 mx-auto transition-shadow duration-200;
+  @apply border border-gray-200 dark:border-gray-800;
 }
 
 /* Link Styles */
 .ProseMirror a {
-  @apply text-purple-400 no-underline border-b border-purple-500/30 transition-all duration-200;
-  @apply hover:text-purple-300 hover:border-purple-400;
+  @apply text-purple-600 dark:text-purple-400 no-underline border-b border-purple-200 dark:border-purple-500/30 transition-all duration-200;
+  @apply hover:text-purple-700 dark:hover:text-purple-300 hover:border-purple-300 dark:hover:border-purple-400;
 }
 
 /* Heading Styles */
 .ProseMirror h1 {
-  @apply text-3xl font-bold mb-4 mt-6 text-gray-100;
-  @apply bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent;
+  @apply text-3xl font-bold mb-4 mt-6 text-gray-900 dark:text-gray-100 transition-colors duration-200;
+  @apply bg-gradient-to-r from-gray-900 to-gray-700 dark:from-purple-200 dark:to-blue-200 bg-clip-text text-transparent;
 }
 
 .ProseMirror h2 {
-  @apply text-2xl font-semibold mb-3 mt-5 text-gray-100;
-  @apply bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent;
+  @apply text-2xl font-semibold mb-3 mt-5 text-gray-900 dark:text-gray-100 transition-colors duration-200;
+  @apply bg-gradient-to-r from-gray-900 to-gray-700 dark:from-purple-200 dark:to-blue-200 bg-clip-text text-transparent;
 }
 
 .ProseMirror h3 {
-  @apply text-xl font-semibold mb-3 mt-4 text-gray-100;
-  @apply bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent;
+  @apply text-xl font-semibold mb-3 mt-4 text-gray-900 dark:text-gray-100 transition-colors duration-200;
+  @apply bg-gradient-to-r from-gray-900 to-gray-700 dark:from-purple-200 dark:to-blue-200 bg-clip-text text-transparent;
 }
 
 /* Highlight Styles */
 .ProseMirror mark {
-  @apply bg-purple-500/20 px-1 rounded text-purple-100;
+  @apply bg-yellow-100 dark:bg-purple-500/20 px-1 rounded text-gray-900 dark:text-purple-100 transition-colors duration-200;
 }
 
 /* YouTube Embed Styles */
 .ProseMirror iframe {
-  @apply w-full aspect-video rounded-md shadow-md my-4;
-  @apply border border-gray-800;
+  @apply w-full aspect-video rounded-md shadow-md my-4 transition-shadow duration-200;
+  @apply border border-gray-200 dark:border-gray-800;
 }
 
 /* Selection Styles */
 .ProseMirror ::selection {
-  @apply bg-purple-500/30 text-purple-50;
+  @apply bg-purple-100 dark:bg-purple-500/30 text-purple-900 dark:text-purple-50;
 }
 
 /* Focus Styles */
@@ -162,108 +168,108 @@
 
 /* Placeholder Styles */
 .ProseMirror p.is-empty::before {
-  @apply text-gray-500 float-left h-0 pointer-events-none;
+  @apply text-gray-400 dark:text-gray-500 float-left h-0 pointer-events-none;
   content: attr(data-placeholder);
 }
 
 /* Toolbar Button Styles */
 .toolbar-button {
   @apply p-1.5 rounded-md transition-all duration-200;
-  @apply text-gray-400 hover:text-gray-100;
-  @apply hover:bg-purple-500/20 active:bg-purple-500/30;
+  @apply text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100;
+  @apply hover:bg-gray-100 dark:hover:bg-purple-500/20 active:bg-gray-200 dark:active:bg-purple-500/30;
   @apply focus:outline-none focus:ring-2 focus:ring-purple-500/50;
 }
 
 .toolbar-button.active {
-  @apply bg-purple-500/20 text-purple-300;
+  @apply bg-gray-100 dark:bg-purple-500/20 text-gray-900 dark:text-purple-300;
 }
 
 /* Dropdown Menu Styles */
 .dropdown-menu {
-  @apply absolute z-50 mt-1 bg-[#0D1117] rounded-md shadow-xl;
-  @apply border border-gray-800 backdrop-blur-sm;
+  @apply absolute z-50 mt-1 bg-white dark:bg-[#0D1117] rounded-md shadow-xl transition-colors duration-200;
+  @apply border border-gray-200 dark:border-gray-800 backdrop-blur-sm;
   @apply py-1 min-w-[160px] max-h-60 overflow-y-auto;
 }
 
 .dropdown-item {
-  @apply px-3 py-1.5 text-sm text-gray-300 hover:text-white cursor-pointer;
-  @apply hover:bg-purple-500/20 transition-colors duration-200;
+  @apply px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white cursor-pointer;
+  @apply hover:bg-gray-100 dark:hover:bg-purple-500/20 transition-colors duration-200;
   @apply flex items-center gap-2;
 }
 
 /* Search Input Styles */
 .search-input {
-  @apply px-2 py-1 text-sm border border-gray-800 rounded-md;
-  @apply bg-[#161B22] text-gray-100;
+  @apply px-2 py-1 text-sm border border-gray-200 dark:border-gray-800 rounded-md transition-colors duration-200;
+  @apply bg-white dark:bg-[#161B22] text-gray-900 dark:text-gray-100;
   @apply focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50;
-  @apply placeholder-gray-500;
+  @apply placeholder-gray-400 dark:placeholder-gray-500;
 }
 
 /* Zoom Controls Styles */
 .zoom-control {
-  @apply flex items-center gap-1 text-sm text-gray-300;
+  @apply flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300;
 }
 
 .zoom-button {
   @apply p-1.5 rounded-md transition-all duration-200;
-  @apply hover:bg-purple-500/20 hover:text-purple-300;
+  @apply hover:bg-gray-100 dark:hover:bg-purple-500/20 hover:text-gray-900 dark:hover:text-purple-300;
   @apply focus:outline-none focus:ring-2 focus:ring-purple-500/50;
 }
 
 /* Editor Container Styles */
 .editor-container {
-  @apply bg-[#0D1117] rounded-lg shadow-2xl overflow-hidden;
-  @apply border border-gray-800;
+  @apply bg-white dark:bg-[#0D1117] rounded-lg shadow-xl overflow-hidden transition-colors duration-200;
+  @apply border border-gray-200 dark:border-gray-800;
   @apply w-full mx-auto;
 }
 
 /* Toolbar Container Styles */
 .toolbar-container {
-  @apply border-b border-gray-800 bg-[#0D1117] fixed top-0 left-0 right-0 z-50;
+  @apply border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0D1117] fixed top-0 left-0 right-0 z-50 transition-colors duration-200;
   @apply bg-opacity-95 backdrop-blur-sm;
 }
 
 /* Status Bar Styles */
 .status-bar {
-  @apply px-4 py-2 border-t border-gray-800 bg-[#161B22];
-  @apply flex justify-between items-center text-sm text-gray-400;
+  @apply px-4 py-2 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-[#161B22] transition-colors duration-200;
+  @apply flex justify-between items-center text-sm text-gray-500 dark:text-gray-400;
 }
 
 /* AI Menu Hover States */
 .ai-menu-button {
   @apply transition-all duration-200;
-  @apply hover:bg-purple-500/20 hover:text-purple-300;
-  @apply active:bg-purple-500/30;
+  @apply hover:bg-gray-100 dark:hover:bg-purple-500/20 hover:text-gray-900 dark:hover:text-purple-300;
+  @apply active:bg-gray-200 dark:active:bg-purple-500/30;
 }
 
 .ai-menu-category {
   @apply transition-all duration-200;
-  @apply hover:bg-purple-500/20 hover:border-purple-500/30;
+  @apply hover:bg-gray-100 dark:hover:bg-purple-500/20 hover:border-gray-300 dark:hover:border-purple-500/30;
 }
 
 .ai-menu-action {
   @apply transition-all duration-200;
-  @apply hover:bg-purple-500/20 hover:text-purple-300;
-  @apply active:bg-purple-500/30;
+  @apply hover:bg-gray-100 dark:hover:bg-purple-500/20 hover:text-gray-900 dark:hover:text-purple-300;
+  @apply active:bg-gray-200 dark:active:bg-purple-500/30;
 }
 
 /* Tool Button Hover States */
 .tool-button {
   @apply transition-all duration-200;
-  @apply hover:bg-purple-500/20 hover:text-purple-300;
-  @apply active:bg-purple-500/30;
+  @apply hover:bg-gray-100 dark:hover:bg-purple-500/20 hover:text-gray-900 dark:hover:text-purple-300;
+  @apply active:bg-gray-200 dark:active:bg-purple-500/30;
   @apply focus:outline-none focus:ring-2 focus:ring-purple-500/50;
 }
 
 .tool-button-active {
-  @apply bg-purple-500/20 text-purple-300;
+  @apply bg-gray-100 dark:bg-purple-500/20 text-gray-900 dark:text-purple-300;
 }
 
 /* Tooltip Improvements */
 .tooltip {
-  @apply absolute z-50 px-2 py-1 text-xs font-medium;
-  @apply bg-[#161B22] text-gray-200 rounded-md shadow-xl;
-  @apply border border-gray-800;
+  @apply absolute z-50 px-2 py-1 text-xs font-medium transition-colors duration-200;
+  @apply bg-white dark:bg-[#161B22] text-gray-900 dark:text-gray-200 rounded-md shadow-xl;
+  @apply border border-gray-200 dark:border-gray-800;
   @apply opacity-0 transition-opacity duration-200;
   @apply pointer-events-none;
 }

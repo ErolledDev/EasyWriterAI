@@ -23,11 +23,15 @@ export default function AIMenu({ editor, isOpen, onClose }: AIMenuProps) {
       );
 
   const handleAIAction = async (actionKey: string) => {
-    if (!selectedText.trim()) return;
+    const text = selectedText.trim();
+    if (!text) {
+      alert('Please select some text or write content first');
+      return;
+    }
 
     try {
       setLoading(true);
-      const result = await generateAIResponse(selectedText, actionKey as any);
+      const result = await generateAIResponse(text, actionKey as any);
       
       if (editor.state.selection.empty) {
         editor.commands.setContent(result);
@@ -35,8 +39,6 @@ export default function AIMenu({ editor, isOpen, onClose }: AIMenuProps) {
         editor.commands.deleteSelection();
         editor.commands.insertContent(result);
       }
-      
-      onClose();
     } catch (error) {
       console.error('AI generation failed:', error);
     } finally {
