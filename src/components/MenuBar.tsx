@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Quote, Redo, Strikethrough, Undo, Link as LinkIcon, Highlighter, Wand2, AlignLeft, AlignCenter, AlignRight, AlignJustify, Heading1, Heading2, Heading3, Table as TableIcon, Image as ImageIcon, Youtube as YoutubeIcon, FileDown, Palette, Type, Eraser, Eye, MinusSquare, Underline as UnderlineIcon, Subscript as SubscriptIcon, Superscript as SuperscriptIcon, Code, CodeSquare, PanelLeftClose, PanelLeftOpen, Trash2, Copy, Scissors, Search, ZoomIn, ZoomOut, RotateCcw, Download, FileUp, Printer, Share2, Lock, Unlock, Settings, HelpCircle, ListChecks, Hash, AtSign, Moon, Sun, UnderlineIcon as TextDecoration, FileText, FileJson, File as FilePdf } from 'lucide-react';
 import { downloadFile, ExportFormat } from '../lib/export';
@@ -15,7 +15,32 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [zoom, setZoom] = useState(100);
   const [showSettings, setShowSettings] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+  const exportButtonRef = useRef<HTMLButtonElement>(null);
   const { theme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        exportMenuRef.current &&
+        !exportMenuRef.current.contains(event.target as Node) &&
+        !exportButtonRef.current?.contains(event.target as Node)
+      ) {
+        setShowExportMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setShowExportMenu(false);
+      exportButtonRef.current?.focus();
+    }
+  };
 
   if (!editor) {
     return null;
@@ -52,6 +77,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
       const filename = `document_${timestamp}`;
       
       await downloadFile(content, filename, format);
+      setShowExportMenu(false);
     } catch (error) {
       console.error('Export error:', error);
     }
@@ -436,43 +462,65 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
       <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
       
       {/* Export */}
-      <div className="relative group">
+      <div className="relative">
         <button
-          className="toolbar-button"
+          ref={exportButtonRef}
+          className={`toolbar-button ${showExportMenu ? 'active' : ''}`}
+          onClick={() => setShowExportMenu(!showExportMenu)}
+          aria-expanded={showExportMenu}
+          aria-haspopup="true"
           title="Export"
         >
           <FileDown className="w-5 h-5" />
         </button>
-        <div className="absolute right-0 mt-2 py-2 w-48 bg-white dark:bg-[#161B22] rounded-md shadow-xl border border-gray-200 dark:border-gray-700 hidden group-hover:block">
-          <button
-            onClick={() => handleDownload('markdown')}
-            className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+        {showExportMenu && (
+          <div
+            ref={exportMenuRef}
+            className="absolute right-0 mt-2 py-2 w-48 bg-white dark:bg-[#161B22] rounded-md shadow-xl border border-gray-200 dark:border-gray-700"
+            role="menu"
+            aria-orientation="vertical"
+            aria-labelledby="export-menu-button"
+            onKeyDown={handleKeyDown}
+            tabIndex={-1}
           >
-            <FileText className="w-4 h-4" />
-            Markdown (.md)
-          </button>
-          <button
-            onClick={() => handleDownload('html')}
-            className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
-          >
-            <FileJson className="w-4 h-4" />
-            HTML (.html)
-          </button>
-          <button
-            onClick={() => handleDownload('txt')}
-            className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
-          >
-            <FileText className="w-4 h-4" />
-            Plain Text (.txt)
-          </button>
-          <button
-            onClick={() => handleDownload('pdf')}
-            className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
-          >
-            <FilePdf className="w-4 h-4" />
-            PDF (.pdf)
-          </button>
-        </div>
+            <button
+              onClick={() => handleDownload('markdown')}
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 focus:text-gray-900 dark:focus:text-gray-100"
+              role="menuitem"
+              tabIndex={0}
+            >
+              <FileText className="w-4 h-4" />
+              Markdown (.md)
+            </button>
+            <button
+              onClick={() => handleDownload('html')}
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 focus:text-gray-900 dark:focus:text-gray-100"
+              role="menuitem"
+              tabIndex={0}
+            >
+              <FileJson className="w-4 h-4" />
+              HTML (.html)
+            </button>
+            <button
+              onClick={() => handleDownload('txt')}
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 focus:text-gray-900 dark:focus:text-gray-100"
+              role="menuitem"
+              tabIndex={0}
+            >
+              <FileText className="w-4 h-4" />
+              Plain Text (.txt)
+            </button>
+            <button
+              onClick={() => handleDownload('pdf')}
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 focus:text-gray-900 dark:focus:text-gray-100"
+              role="menuitem"
+              tabIndex={0}
+            >
+              <FilePdf className="w-4 h-4" />
+              PDF (.pdf)
+            </button>
+          </div>
+        )}
       </div>
       
       <button onClick={handlePrint} className="toolbar-button" title="Print">
