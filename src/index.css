@@ -8,6 +8,14 @@
   }
 }
 
+.cursor-grab {
+  cursor: grab;
+}
+
+.cursor-grabbing {
+  cursor: grabbing;
+}
+
 /* Scrollbar Styles */
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
@@ -20,6 +28,10 @@
 .scrollbar-thin::-webkit-scrollbar-thumb {
   @apply bg-purple-500/40;
   border-radius: 2px;
+}
+
+.custom-padding-top-32 {
+  padding-top: 32px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
@@ -319,4 +331,27 @@
 .ProseMirror img.align-right,
 .ProseMirror iframe.align-right {
   @apply float-right ml-4 mb-4;
+}
+
+@keyframes pulse-gradient {
+  0%, 100% {
+    background-opacity: 0.1;
+  }
+  50% {
+    background-opacity: 0.3;
+  }
+}
+
+.toolbar-button.pulse-gradient {
+  position: relative;
+  overflow: hidden;
+}
+
+.toolbar-button.pulse-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.2));
+  animation: pulse-gradient 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border-radius: 0.375rem;
 }

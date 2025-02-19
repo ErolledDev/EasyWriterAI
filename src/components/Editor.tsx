@@ -55,7 +55,7 @@ const ResizableImage = Image.extend({
 });
 
 const Editor = () => {
-  const [showAIMenu, setShowAIMenu] = useState(true);
+  const [showAIMenu, setShowAIMenu] = useState(false);
   const [characterCount, setCharacterCount] = useState(0);
   
   const editor = useEditor({
@@ -140,7 +140,7 @@ const Editor = () => {
     editorProps: {
       attributes: {
         class:
-          'prose prose-invert prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none p-8 min-h-[calc(100vh-13rem)] bg-white dark:bg-[#0D1117] text-gray-900 dark:text-gray-100 transition-colors duration-200',
+          'prose prose-invert prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none p-8 min-h-[calc(100vh-13rem)] bg-white dark:bg-[#0D1117] text-gray-900 dark:text-gray-100 transition-colors duration-200 custom-padding-top-32',
       },
       handleDrop: (view, event, slice, moved) => {
         if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {

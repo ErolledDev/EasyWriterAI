@@ -682,10 +682,11 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
       {/* AI Menu Toggle */}
       <button
         onClick={onToggleAI}
-        className="toolbar-button"
+        className="toolbar-button group relative"
         title="Toggle AI Assistant"
       >
-        <Wand2 className="w-5 h-5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-blue-400/20 rounded-md animate-pulse group-hover:from-purple-400/30 group-hover:to-blue-400/30"></div>
+        <Wand2 className="w-5 h-5 relative z-10 text-purple-500 dark:text-purple-400 group-hover:text-purple-600 dark:group-hover:text-purple-300" />
       </button>
 
       {/* Theme Toggle */}
