@@ -3,12 +3,16 @@ import Editor from './components/Editor';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
-      <div className="max-w-4xl mx-auto mb-8">
-        <h1 className="text-3xl font-semibold text-gray-900 mb-2">Tiptap Editor</h1>
-        <p className="text-gray-600">A powerful rich text editor with AI assistance</p>
+    <div className="min-h-screen bg-[#0D0D0D] text-white">
+      <div className="max-w-[90rem] mx-auto px-8 py-16">
+        <div className="max-w-3xl mx-auto mb-16 text-center">
+          <h1 className="text-5xl font-bold mb-6">The Editor Framework</h1>
+          <p className="text-xl text-gray-400">
+            A headless, framework-agnostic text editor that's focused on stability and reliability.
+          </p>
+        </div>
+        <Editor />
       </div>
-      <Editor />
     </div>
   );
 }

@@ -28,6 +28,7 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Mention from '@tiptap/extension-mention';
 import CharacterCount from '@tiptap/extension-character-count';
+import { FontSize } from '../lib/extensions/fontSize';
 import {
   Bold, Italic, List, ListOrdered, Quote, Redo, Strikethrough, Undo,
   Link as LinkIcon, Highlighter, Wand2, AlignLeft, AlignCenter, AlignRight,
@@ -193,45 +194,45 @@ const MenuBar = ({ editor }: { editor: any }) => {
   };
 
   return (
-    <div className="border-b border-gray-200">
+    <div className="border-b border-gray-700">
       {/* Main Toolbar */}
-      <div className="p-2 flex flex-wrap gap-2 border-b border-gray-200">
+      <div className="p-2 flex flex-wrap gap-2 border-b border-gray-700">
         {/* File Operations */}
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
+        <div className="flex items-center gap-1 pr-2 border-r border-gray-700">
           <Tooltip text="New Document">
             <button
               onClick={clearContent}
-              className="p-2 rounded hover:bg-gray-100"
+              className="p-2 rounded hover:bg-gray-800"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
           </Tooltip>
           <Tooltip text="Import File">
-            <button className="p-2 rounded hover:bg-gray-100">
+            <button className="p-2 rounded hover:bg-gray-800">
               <FileUp className="w-4 h-4" />
             </button>
           </Tooltip>
           <Tooltip text="Export">
             <div className="relative group">
-              <button className="p-2 rounded hover:bg-gray-100">
+              <button className="p-2 rounded hover:bg-gray-800">
                 <FileDown className="w-4 h-4" />
               </button>
-              <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 hidden group-hover:block z-50">
+              <div className="absolute top-full left-0 mt-1 bg-gray-800 rounded-lg shadow-lg border border-gray-700 hidden group-hover:block z-50">
                 <button
                   onClick={() => handleExport('markdown')}
-                  className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                  className="block w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-gray-700"
                 >
                   Export as Markdown
                 </button>
                 <button
                   onClick={() => handleExport('html')}
-                  className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                  className="block w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-gray-700"
                 >
                   Export as HTML
                 </button>
                 <button
                   onClick={() => handleExport('text')}
-                  className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                  className="block w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-gray-700"
                 >
                   Export as Text
                 </button>
@@ -241,11 +242,11 @@ const MenuBar = ({ editor }: { editor: any }) => {
         </div>
 
         {/* Edit Operations */}
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
+        <div className="flex items-center gap-1 pr-2 border-r border-gray-700">
           <Tooltip text="Copy">
             <button
               onClick={handleCopy}
-              className="p-2 rounded hover:bg-gray-100"
+              className="p-2 rounded hover:bg-gray-800"
             >
               <Copy className="w-4 h-4" />
             </button>
@@ -253,7 +254,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Cut">
             <button
               onClick={handleCut}
-              className="p-2 rounded hover:bg-gray-100"
+              className="p-2 rounded hover:bg-gray-800"
             >
               <Scissors className="w-4 h-4" />
             </button>
@@ -261,12 +262,12 @@ const MenuBar = ({ editor }: { editor: any }) => {
         </div>
 
         {/* Text Style */}
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
+        <div className="flex items-center gap-1 pr-2 border-r border-gray-700">
           <Tooltip text="Bold">
             <button
               onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('bold') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('bold') ? 'bg-gray-800' : ''
               }`}
             >
               <Bold className="w-4 h-4" />
@@ -275,8 +276,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Italic">
             <button
               onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('italic') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('italic') ? 'bg-gray-800' : ''
               }`}
             >
               <Italic className="w-4 h-4" />
@@ -285,8 +286,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Underline">
             <button
               onClick={() => editor.chain().focus().toggleUnderline().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('underline') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('underline') ? 'bg-gray-800' : ''
               }`}
             >
               <UnderlineIcon className="w-4 h-4" />
@@ -295,8 +296,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Strikethrough">
             <button
               onClick={() => editor.chain().focus().toggleStrike().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('strike') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('strike') ? 'bg-gray-800' : ''
               }`}
             >
               <Strikethrough className="w-4 h-4" />
@@ -305,19 +306,19 @@ const MenuBar = ({ editor }: { editor: any }) => {
         </div>
 
         {/* Font Controls */}
-        <div className="flex items-center gap-2 pr-2 border-r border-gray-200">
+        <div className="flex items-center gap-2 pr-2 border-r border-gray-700">
           <div className="relative">
             <Tooltip text="Font Family">
               <button
                 onClick={() => setShowFontFamily(!showFontFamily)}
-                className="p-2 rounded hover:bg-gray-100 flex items-center gap-1 min-w-[120px]"
+                className="p-2 rounded hover:bg-gray-800 flex items-center gap-1 min-w-[120px]"
               >
                 <Type className="w-4 h-4" />
                 <span className="text-sm">Font Family</span>
               </button>
             </Tooltip>
             {showFontFamily && (
-              <div className="absolute top-full left-0 mt-1 p-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 w-48 max-h-60 overflow-y-auto">
+              <div className="absolute top-full left-0 mt-1 p-2 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50 w-48 max-h-60 overflow-y-auto">
                 {FONT_FAMILIES.map(font => (
                   <button
                     key={font}
@@ -325,7 +326,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
                       editor.chain().focus().setFontFamily(font).run();
                       setShowFontFamily(false);
                     }}
-                    className="block w-full text-left px-2 py-1 text-sm hover:bg-gray-100 rounded"
+                    className="block w-full text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-700 rounded"
                     style={{ fontFamily: font }}
                   >
                     {font}
@@ -339,13 +340,13 @@ const MenuBar = ({ editor }: { editor: any }) => {
             <Tooltip text="Font Size">
               <button
                 onClick={() => setShowFontSize(!showFontSize)}
-                className="p-2 rounded hover:bg-gray-100 flex items-center gap-1 min-w-[100px]"
+                className="p-2 rounded hover:bg-gray-800 flex items-center gap-1 min-w-[100px]"
               >
                 <span className="text-sm">Font Size</span>
               </button>
             </Tooltip>
             {showFontSize && (
-              <div className="absolute top-full left-0 mt-1 p-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 w-32 max-h-60 overflow-y-auto">
+              <div className="absolute top-full left-0 mt-1 p-2 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50 w-32 max-h-60 overflow-y-auto">
                 {FONT_SIZES.map(size => (
                   <button
                     key={size}
@@ -353,7 +354,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
                       editor.chain().focus().setFontSize(size).run();
                       setShowFontSize(false);
                     }}
-                    className="block w-full text-left px-2 py-1 text-sm hover:bg-gray-100 rounded"
+                    className="block w-full text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-700 rounded"
                     style={{ fontSize: size }}
                   >
                     {size}
@@ -367,13 +368,13 @@ const MenuBar = ({ editor }: { editor: any }) => {
             <Tooltip text="Text Color">
               <button
                 onClick={() => setShowColorPicker(!showColorPicker)}
-                className="p-2 rounded hover:bg-gray-100"
+                className="p-2 rounded hover:bg-gray-800"
               >
                 <Palette className="w-4 h-4" />
               </button>
             </Tooltip>
             {showColorPicker && (
-              <div className="absolute top-full left-0 mt-1 p-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 w-56">
+              <div className="absolute top-full left-0 mt-1 p-2 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50 w-56">
                 <div className="grid grid-cols-8 gap-1">
                   {[
                     '#000000', '#434343', '#666666', '#999999', '#B7B7B7', '#CCCCCC', '#D9D9D9', '#FFFFFF',
@@ -387,7 +388,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
                         editor.chain().focus().setColor(color).run();
                         setShowColorPicker(false);
                       }}
-                      className="w-6 h-6 rounded border border-gray-200 hover:scale-110 transition-transform"
+                      className="w-6 h-6 rounded border border-gray-600 hover:scale-110 transition-transform"
                       style={{ backgroundColor: color }}
                       title={color}
                     />
@@ -399,11 +400,11 @@ const MenuBar = ({ editor }: { editor: any }) => {
         </div>
 
         {/* View Controls */}
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
+        <div className="flex items-center gap-1 pr-2 border-r border-gray-700">
           <Tooltip text="Zoom In">
             <button
               onClick={() => handleZoom('in')}
-              className="p-2 rounded hover:bg-gray-100"
+              className="p-2 rounded hover:bg-gray-800"
             >
               <ZoomIn className="w-4 h-4" />
             </button>
@@ -411,26 +412,26 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Zoom Out">
             <button
               onClick={() => handleZoom('out')}
-              className="p-2 rounded hover:bg-gray-100"
+              className="p-2 rounded hover:bg-gray-800"
             >
               <ZoomOut className="w-4 h-4" />
             </button>
           </Tooltip>
-          <span className="text-sm text-gray-500">{zoom}%</span>
+          <span className="text-sm text-gray-400">{zoom}%</span>
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
+        <div className="flex items-center gap-1 pr-2 border-r border-gray-700">
           <input
             ref={searchInputRef}
             type="text"
             placeholder="Search..."
-            className="px-2 py-1 border border-gray-300 rounded text-sm"
+            className="px-2 py-1 border border-gray-600 rounded text-sm bg-gray-800 text-gray-300"
           />
           <Tooltip text="Search">
             <button
               onClick={handleSearch}
-              className="p-2 rounded hover:bg-gray-100"
+              className="p-2 rounded hover:bg-gray-800"
             >
               <Search className="w-4 h-4" />
             </button>
@@ -442,14 +443,14 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Print">
             <button
               onClick={handlePrint}
-              className="p-2 rounded hover:bg-gray-100"
+              className="p-2 rounded hover:bg-gray-800"
             >
               <Printer className="w-4 h-4" />
             </button>
           </Tooltip>
 
           <Tooltip text="Share">
-            <button className="p-2 rounded hover:bg-gray-100">
+            <button className="p-2 rounded hover:bg-gray-800">
               <Share2 className="w-4 h-4" />
             </button>
           </Tooltip>
@@ -460,7 +461,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
                 setIsReadOnly(!isReadOnly);
                 editor.setEditable(!isReadOnly);
               }}
-              className="p-2 rounded hover:bg-gray-100"
+              className="p-2 rounded hover:bg-gray-800"
             >
               {isReadOnly ? (
                 <Lock className="w-4 h-4" />
@@ -471,13 +472,13 @@ const MenuBar = ({ editor }: { editor: any }) => {
           </Tooltip>
 
           <Tooltip text="Settings">
-            <button className="p-2 rounded hover:bg-gray-100">
+            <button className="p-2 rounded hover:bg-gray-800">
               <Settings className="w-4 h-4" />
             </button>
           </Tooltip>
 
           <Tooltip text="Help">
-            <button className="p-2 rounded hover:bg-gray-100">
+            <button className="p-2 rounded hover:bg-gray-800">
               <HelpCircle className="w-4 h-4" />
             </button>
           </Tooltip>
@@ -485,11 +486,11 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="AI Assistant">
             <button
               onClick={() => setShowAIMenu(!showAIMenu)}
-              className={`p-2 rounded hover:bg-purple-100 ${
-                showAIMenu ? 'bg-purple-100' : ''
+              className={`p-2 rounded hover:bg-purple-900 ${
+                showAIMenu ? 'bg-purple-900' : ''
               }`}
             >
-              <Wand2 className="w-4 h-4 text-purple-600" />
+              <Wand2 className="w-4 h-4 text-purple-400" />
             </button>
           </Tooltip>
         </div>
@@ -498,12 +499,12 @@ const MenuBar = ({ editor }: { editor: any }) => {
       {/* Secondary Toolbar */}
       <div className="p-2 flex flex-wrap gap-2">
         {/* Lists and Quotes */}
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
+        <div className="flex items-center gap-1 pr-2 border-r border-gray-700">
           <Tooltip text="Bullet List">
             <button
               onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('bulletList') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('bulletList') ? 'bg-gray-800' : ''
               }`}
             >
               <List className="w-4 h-4" />
@@ -512,8 +513,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Numbered List">
             <button
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('orderedList') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('orderedList') ? 'bg-gray-800' : ''
               }`}
             >
               <ListOrdered className="w-4 h-4" />
@@ -522,8 +523,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Quote">
             <button
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('blockquote') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('blockquote') ? 'bg-gray-800' : ''
               }`}
             >
               <Quote className="w-4 h-4" />
@@ -532,12 +533,12 @@ const MenuBar = ({ editor }: { editor: any }) => {
         </div>
 
         {/* Script Controls */}
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
+        <div className="flex items-center gap-1 pr-2 border-r border-gray-700">
           <Tooltip text="Subscript">
             <button
               onClick={() => editor.chain().focus().toggleSubscript().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('subscript') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('subscript') ? 'bg-gray-800' : ''
               }`}
             >
               <SubscriptIcon className="w-4 h-4" />
@@ -546,8 +547,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Superscript">
             <button
               onClick={() => editor.chain().focus().toggleSuperscript().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('superscript') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('superscript') ? 'bg-gray-800' : ''
               }`}
             >
               <SuperscriptIcon className="w-4 h-4" />
@@ -556,12 +557,12 @@ const MenuBar = ({ editor }: { editor: any }) => {
         </div>
 
         {/* Code */}
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
+        <div className="flex items-center gap-1 pr-2 border-r border-gray-700">
           <Tooltip text="Inline Code">
             <button
               onClick={() => editor.chain().focus().toggleCode().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('code') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('code') ? 'bg-gray-800' : ''
               }`}
             >
               <Code className="w-4 h-4" />
@@ -570,8 +571,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Code Block">
             <button
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('codeBlock') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('codeBlock') ? 'bg-gray-800' : ''
               }`}
             >
               <CodeSquare className="w-4 h-4" />
@@ -580,12 +581,12 @@ const MenuBar = ({ editor }: { editor: any }) => {
         </div>
 
         {/* Insert Tools */}
-        <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
+        <div className="flex items-center gap-1 pr-2 border-r border-gray-700">
           <Tooltip text="Insert Link">
             <button
               onClick={addLink}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('link') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('link') ? 'bg-gray-800' : ''
               }`}
             >
               <LinkIcon className="w-4 h-4" />
@@ -594,8 +595,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Insert Table">
             <button
               onClick={insertTable}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('table') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('table') ? 'bg-gray-800' : ''
               }`}
             >
               <TableIcon className="w-4 h-4" />
@@ -604,7 +605,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Insert Image">
             <button
               onClick={addImage}
-              className="p-2 rounded hover:bg-gray-100"
+              className="p-2 rounded hover:bg-gray-800"
             >
               <ImageIcon className="w-4 h-4" />
             </button>
@@ -612,7 +613,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Insert YouTube Video">
             <button
               onClick={addYoutubeVideo}
-              className="p-2 rounded hover:bg-gray-100"
+              className="p-2 rounded hover:bg-gray-800"
             >
               <YoutubeIcon className="w-4 h-4" />
             </button>
@@ -620,7 +621,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Insert Horizontal Rule">
             <button
               onClick={() => editor.chain().focus().setHorizontalRule().run()}
-              className="p-2 rounded hover:bg-gray-100"
+              className="p-2 rounded hover:bg-gray-800"
             >
               <MinusSquare className="w-4 h-4" />
             </button>
@@ -632,8 +633,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Highlight">
             <button
               onClick={() => editor.chain().focus().toggleHighlight().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor.isActive('highlight') ? 'bg-gray-100' : ''
+              className={`p-2 rounded hover:bg-gray-800 ${
+                editor.isActive('highlight') ? 'bg-gray-800' : ''
               }`}
             >
               <Highlighter className="w-4 h-4" />
@@ -642,7 +643,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
           <Tooltip text="Clear Formatting">
             <button
               onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
-              className="p-2 rounded hover:bg-gray-100"
+              className="p-2 rounded hover:bg-gray-800"
             >
               <Eraser className="w-4 h-4" />
             </button>
@@ -685,7 +686,7 @@ const Editor = () => {
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-500 hover:text-blue-600 underline',
+          class: 'text-blue-400 hover:text-blue-300',
         },
       }),
       TextAlign.configure({
@@ -716,6 +717,7 @@ const Editor = () => {
       Subscript,
       Superscript,
       FontFamily,
+      FontSize,
       Strike,
       ListItem,
       TaskList,
@@ -749,7 +751,7 @@ const Editor = () => {
     editorProps: {
       attributes: {
         class:
-          'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none p-4 min-h-[200px]',
+          'prose prose-invert prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none p-4 min-h-[200px]',
       },
     },
     onUpdate: ({ editor }) => {
@@ -761,10 +763,10 @@ const Editor = () => {
   });
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="w-full mx-auto bg-[#1D1D1D] rounded-lg shadow-xl overflow-hidden border border-gray-700">
       <MenuBar editor={editor} />
       <EditorContent editor={editor} />
-      <div className="px-4 py-2 border-t border-gray-200 flex justify-between items-center text-sm text-gray-500">
+      <div className="px-4 py-2 border-t border-gray-700 flex justify-between items-center text-sm text-gray-400 bg-[#2D2D2D]">
         <div>
           Characters: {characterCount}
           {editor?.storage.characterCount.limit && (
