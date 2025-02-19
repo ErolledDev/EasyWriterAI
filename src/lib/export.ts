@@ -1,7 +1,13 @@
-import { convertHtmlToMarkdown } from 'html-to-markdown';
+import TurndownService from 'turndown';
+
+const turndownService = new TurndownService({
+  headingStyle: 'atx',
+  codeBlockStyle: 'fenced',
+  emDelimiter: '_',
+});
 
 export function convertToMarkdown(html: string): string {
-  return convertHtmlToMarkdown(html);
+  return turndownService.turndown(html);
 }
 
 export function downloadFile(content: string, filename: string) {
