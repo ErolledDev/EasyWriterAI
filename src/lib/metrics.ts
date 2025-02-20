@@ -2,6 +2,7 @@
 const WORDS_PER_MINUTE = 200;
 
 export function calculateReadingTime(wordCount: number): string {
+  if (!wordCount || isNaN(wordCount)) return '< 1 min';
   const minutes = Math.ceil(wordCount / WORDS_PER_MINUTE);
   if (minutes < 1) return '< 1 min';
   return `${minutes} min${minutes === 1 ? '' : 's'}`;
@@ -9,6 +10,8 @@ export function calculateReadingTime(wordCount: number): string {
 
 // Reading level calculation based on text complexity
 export function calculateReadingLevel(text: string): string {
+  if (!text || typeof text !== 'string') return 'Beginner';
+
   // Remove extra whitespace and split into sentences
   const sentences = text.trim()
     .replace(/\s+/g, ' ')
@@ -18,16 +21,12 @@ export function calculateReadingLevel(text: string): string {
   if (sentences.length === 0) return 'Beginner';
 
   // Calculate average sentence length
-  const avgSentenceLength = text.split(/\s+/).length / sentences.length;
+  const words = text.split(/\s+/).filter(word => word.length > 0);
+  const avgSentenceLength = words.length / sentences.length;
   
   // Calculate percentage of complex words (words with 3 or more syllables)
-  const words = text.toLowerCase()
-    .replace(/[^a-z\s]/g, '')
-    .split(/\s+/)
-    .filter(word => word.length > 0);
-
   const complexWords = words.filter(word => countSyllables(word) >= 3);
-  const complexWordPercentage = (complexWords.length / words.length) * 100;
+  const complexWordPercentage = words.length > 0 ? (complexWords.length / words.length) * 100 : 0;
 
   // Determine reading level based on metrics
   if (avgSentenceLength <= 12 && complexWordPercentage <= 10) {
@@ -41,7 +40,9 @@ export function calculateReadingLevel(text: string): string {
 
 // Helper function to count syllables in a word
 function countSyllables(word: string): number {
-  word = word.toLowerCase();
+  if (!word || typeof word !== 'string') return 0;
+  
+  word = word.toLowerCase().trim();
   if (word.length <= 3) return 1;
 
   // Remove common word endings

@@ -29,7 +29,7 @@ import TaskItem from '@tiptap/extension-task-item';
 import Mention from '@tiptap/extension-mention';
 import CharacterCount from '@tiptap/extension-character-count';
 import { FontSize } from '../lib/extensions/fontSize';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import AIMenu from './AIMenu';
 import MenuBar from './MenuBar';
 import { calculateReadingTime, calculateReadingLevel } from '../lib/metrics';
@@ -55,6 +55,37 @@ const ResizableImage = Image.extend({
   },
 });
 
+// Custom YouTube extension with improved configuration
+const CustomYoutube = Youtube.configure({
+  HTMLAttributes: {
+    class: 'w-full aspect-video rounded-lg shadow-md',
+  },
+  inline: false,
+  allowFullscreen: true,
+  autoplay: false,
+  ccLanguage: undefined,
+  ccLoadPolicy: undefined,
+  controls: true,
+  disableKBcontrols: false,
+  enableIFrameApi: false,
+  endTime: 0,
+  height: 480,
+  interfaceLanguage: undefined,
+  ivLoadPolicy: 0,
+  loop: false,
+  modestBranding: true,
+  nocookie: true, // Enable privacy-enhanced mode
+  origin: window.location.origin,
+  playlist: '',
+  progressBarColor: undefined,
+  startAt: 0,
+  width: 640,
+  transformUrl: (url: string) => {
+    // Transform YouTube URLs to use privacy-enhanced domain
+    return url.replace('youtube.com/embed/', 'youtube-nocookie.com/embed/');
+  },
+});
+
 const Editor = () => {
   const [showAIMenu, setShowAIMenu] = useState(false);
   const [characterCount, setCharacterCount] = useState(0);
@@ -62,6 +93,23 @@ const Editor = () => {
   const [readingTime, setReadingTime] = useState('');
   const [readingLevel, setReadingLevel] = useState('');
   
+  const updateMetrics = useCallback((editor: any) => {
+    try {
+      const chars = editor.storage.characterCount.characters() || 0;
+      const words = editor.storage.characterCount.words() || 0;
+      setCharacterCount(chars);
+      setWordCount(words);
+      setReadingTime(calculateReadingTime(words));
+      setReadingLevel(calculateReadingLevel(editor.getText() || ''));
+    } catch (error) {
+      console.error('Error updating metrics:', error);
+      setCharacterCount(0);
+      setWordCount(0);
+      setReadingTime('< 1 min');
+      setReadingLevel('Beginner');
+    }
+  }, []);
+
   const editor = useEditor({
     extensions: [
       Document,
@@ -97,13 +145,7 @@ const Editor = () => {
           class: 'max-w-full rounded-lg shadow-md cursor-pointer',
         },
       }),
-      Youtube.configure({
-        width: 640,
-        height: 480,
-        HTMLAttributes: {
-          class: 'w-full aspect-video rounded-lg shadow-md',
-        },
-      }),
+      CustomYoutube,
       TextStyle,
       Color,
       Typography,
@@ -222,12 +264,7 @@ const Editor = () => {
       },
     },
     onUpdate: ({ editor }) => {
-      const chars = editor.storage.characterCount.characters();
-      const words = editor.storage.characterCount.words();
-      setCharacterCount(chars);
-      setWordCount(words);
-      setReadingTime(calculateReadingTime(words));
-      setReadingLevel(calculateReadingLevel(editor.getText()));
+      updateMetrics(editor);
     },
   });
 

@@ -58,7 +58,7 @@
 /* Editor Styles */
 .ProseMirror {
   @apply min-h-[calc(100vh-13rem)] outline-none bg-white dark:bg-[#0D1117] text-gray-900 dark:text-gray-100 text-base leading-relaxed transition-colors duration-200;
-  @apply p-8 ;
+  @apply p-8;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
@@ -167,6 +167,7 @@
 .ProseMirror iframe {
   @apply w-full aspect-video rounded-md shadow-md my-4 transition-shadow duration-200;
   @apply border border-gray-200 dark:border-gray-800;
+  min-height: 315px !important;
 }
 
 /* Selection Styles */
@@ -355,4 +356,14 @@
   background: linear-gradient(45deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.2));
   animation: pulse-gradient 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   border-radius: 0.375rem;
+}
+
+/* YouTube iframe specific styles */
+.ProseMirror .youtube-wrapper {
+  @apply relative w-full aspect-video my-4;
+}
+
+.ProseMirror .youtube-wrapper iframe {
+  @apply absolute top-0 left-0 w-full h-full;
+  min-height: unset !important;
 }
