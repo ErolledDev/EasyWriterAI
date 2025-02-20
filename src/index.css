@@ -30,8 +30,9 @@
   border-radius: 2px;
 }
 
-.custom-padding-top-32 {
-  padding-top: 32px;
+/* Remove the custom padding class since we don't need it anymore */
+.ProseMirror {
+  padding-top: 0 !important;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
@@ -57,7 +58,7 @@
 /* Editor Styles */
 .ProseMirror {
   @apply min-h-[calc(100vh-13rem)] outline-none bg-white dark:bg-[#0D1117] text-gray-900 dark:text-gray-100 text-base leading-relaxed transition-colors duration-200;
-  @apply p-8;
+  @apply p-8 ;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
