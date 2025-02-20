@@ -21,11 +21,13 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
   const [showAlert, setShowAlert] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
   
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const exportButtonRef = useRef<HTMLButtonElement>(null);
   const linkInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -36,6 +38,9 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
         !exportButtonRef.current?.contains(event.target as Node)
       ) {
         setShowExportMenu(false);
+      }
+      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setShowSettings(false);
       }
     };
 
@@ -298,6 +303,14 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
     } else {
       showNotification('No matches found', 'error');
     }
+  };
+
+  const handleSaveApiKey = () => {
+    localStorage.setItem('gemini_api_key', apiKey);
+    setShowSettings(false);
+    showNotification('API key saved successfully', 'success');
+    // Reload the page to apply the new API key
+    window.location.reload();
   };
 
   return (
@@ -700,7 +713,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
           >
             <button
               onClick={() => handleDownload('markdown')}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 focus:text-gray-900 dark:focus:text-gray-100"
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 focus:outline-none focus :bg-gray-100 dark:focus:bg-gray-800 focus:text-gray-900 dark:focus:text-gray-100"
               role="menuitem"
               tabIndex={0}
             >
@@ -709,7 +722,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
             </button>
             <button
               onClick={() => handleDownload('html')}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 focus: outline-none focus:bg-gray-100 dark:focus:bg-gray-800 focus:text-gray-900 dark:focus:text-gray-100"
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 focus:text-gray-900 dark:focus:text-gray-100"
               role="menuitem"
               tabIndex={0}
             >
@@ -763,6 +776,66 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
       </button>
 
       <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
+
+      {/* Settings Button */}
+      <button
+        onClick={() => setShowSettings(!showSettings)}
+        className="toolbar-button"
+        title="Settings"
+      >
+        <Settings className="w-5 h-5" />
+      </button>
+
+      {/* Settings Panel */}
+      {showSettings && (
+        <div
+          ref={settingsRef}
+          className="absolute right-0 top-full mt-2 p-4 bg-white dark:bg-[#161B22] rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-80"
+        >
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
+                API Settings
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Enter your Gemini API key to enable AI features
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <label
+                htmlFor="apiKey"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Gemini API Key
+              </label>
+              <input
+                type="password"
+                id="apiKey"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-[#0D1117] dark:text-gray-100"
+                placeholder="Enter your API key"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowSettings(false)}
+                className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveApiKey}
+                className="px-3 py-2 text-sm bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* AI Menu Toggle */}
       <button
