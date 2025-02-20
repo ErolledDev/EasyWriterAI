@@ -186,44 +186,13 @@ const Editor = () => {
     editorProps: {
       attributes: {
         class:
-          'prose prose-invert prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none p-8 min-h-[calc(100vh-13rem)] bg-white dark:bg-[#0D1117] text-gray-900 dark:text-gray-100 transition-colors duration-200',
+          'prose prose-invert prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none p-8 min-h-[calc(100vh-13rem)] bg-white dark:bg-[#0D1117] text-gray-900 dark:text-gray-100 transition-colors duration-200 will-change-transform',
       },
-      handleDrop: (view, event, slice, moved) => {
-        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
-          const file = event.dataTransfer.files[0];
-          if (file.type.startsWith('image/')) {
-            // Handle image drop
-            const reader = new FileReader();
-            reader.onload = (readerEvent) => {
-              const img = new Image();
-              img.onload = () => {
-                // Calculate dimensions maintaining aspect ratio
-                let width = img.width;
-                let height = img.height;
-                const maxWidth = 800;
-                
-                if (width > maxWidth) {
-                  height = (height * maxWidth) / width;
-                  width = maxWidth;
-                }
-
-                const { tr } = view.state;
-                const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos;
-                if (pos) {
-                  view.dispatch(tr.insert(pos, view.state.schema.nodes.image.create({
-                    src: readerEvent.target?.result,
-                    width,
-                    height,
-                  })));
-                }
-              };
-              img.src = readerEvent.target?.result as string;
-            };
-            reader.readAsDataURL(file);
-            return true;
-          }
-        }
-        return false;
+      handleDOMEvents: {
+        input: (view, event) => {
+          if (view.composing) return false;
+          return false;
+        },
       },
       handlePaste: (view, event) => {
         const items = Array.from(event.clipboardData?.items || []);
@@ -234,18 +203,27 @@ const Editor = () => {
           const file = imageItem.getAsFile();
           if (!file) return false;
 
+          if (file.size > 10 * 1024 * 1024) {
+            window.alert('Image size must be less than 10MB');
+            return true;
+          }
+
           const reader = new FileReader();
           reader.onload = (readerEvent) => {
             const img = new Image();
             img.onload = () => {
-              // Calculate dimensions maintaining aspect ratio
               let width = img.width;
               let height = img.height;
-              const maxWidth = 800;
+              const maxWidth = 1200;
+              const maxHeight = 1200;
               
               if (width > maxWidth) {
                 height = (height * maxWidth) / width;
                 width = maxWidth;
+              }
+              if (height > maxHeight) {
+                width = (width * maxHeight) / height;
+                height = maxHeight;
               }
 
               const { tr } = view.state;
@@ -253,6 +231,7 @@ const Editor = () => {
                 src: readerEvent.target?.result,
                 width,
                 height,
+                alt: file.name.replace(/\.[^/.]+$/, ""),
               })));
             };
             img.src = readerEvent.target?.result as string;
@@ -264,7 +243,10 @@ const Editor = () => {
       },
     },
     onUpdate: ({ editor }) => {
-      updateMetrics(editor);
+      const timeoutId = setTimeout(() => {
+        updateMetrics(editor);
+      }, 250);
+      return () => clearTimeout(timeoutId);
     },
   });
 

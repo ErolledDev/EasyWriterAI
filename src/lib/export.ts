@@ -91,8 +91,8 @@ async function compressImage(imageElement: HTMLImageElement): Promise<string> {
   }
 }
 
+// Optimize PDF generation
 export async function convertToPDF(editorElement: HTMLElement): Promise<Blob> {
-  // Create a clone of the editor element to modify for PDF export
   const clone = editorElement.cloneNode(true) as HTMLElement;
   const tempContainer = document.createElement('div');
   tempContainer.appendChild(clone);
@@ -102,130 +102,65 @@ export async function convertToPDF(editorElement: HTMLElement): Promise<Blob> {
   document.body.appendChild(tempContainer);
 
   try {
-    // Process all images before PDF generation
-    const images = clone.getElementsByTagName('img');
-    for (let i = 0; i < images.length; i++) {
-      const img = images[i];
+    // Process images in parallel
+    const images = Array.from(clone.getElementsByTagName('img'));
+    await Promise.all(images.map(async (img) => {
+      if (img.src.startsWith('data:image')) return;
+      
+      img.crossOrigin = 'anonymous';
       try {
-        // Skip already processed images
-        if (img.src.startsWith('data:image')) continue;
-        
-        // Set crossOrigin for external images
-        img.crossOrigin = 'anonymous';
-        
-        // Convert and compress image
         const compressedDataUrl = await compressImage(img);
         img.src = compressedDataUrl;
         
-        // Apply optimal styling for PDF
-        img.style.display = 'block';
-        img.style.margin = '2rem auto';
-        img.style.height = 'auto';
-        img.style.maxWidth = '500px';
-        img.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
-        img.style.borderRadius = '6px';
+        // Optimize image styles
+        Object.assign(img.style, {
+          display: 'block',
+          margin: '2rem auto',
+          height: 'auto',
+          maxWidth: '500px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          borderRadius: '6px',
+        });
       } catch (error) {
-        console.error('Error processing image:', error);
-        continue;
+        console.warn('Image processing failed:', error);
       }
-    }
+    }));
 
-    // Enhanced styling for PDF
-    clone.style.padding = '48px';
-    clone.style.background = 'white';
-    clone.style.color = '#1a1a1a';
-    clone.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-    clone.style.lineHeight = '1.6';
-
-    // Enhance heading styles
-    const headings = clone.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    headings.forEach(heading => {
-      heading.style.color = '#1a1a1a';
-      heading.style.background = 'none';
-      heading.style.backgroundClip = 'initial';
-      heading.style.webkitBackgroundClip = 'initial';
-      heading.style.webkitTextFillColor = 'initial';
-      heading.style.marginBottom = '1rem';
-      heading.style.fontWeight = 'bold';
-    });
-
-    // Enhance link styles
-    const links = clone.querySelectorAll('a');
-    links.forEach(link => {
-      link.style.color = '#2563eb';
-      link.style.textDecoration = 'underline';
-    });
-
-    // Enhance text styles
-    const allText = clone.querySelectorAll('p, span, li, td, th, blockquote');
-    allText.forEach(element => {
-      (element as HTMLElement).style.color = '#1a1a1a';
-      (element as HTMLElement).style.marginBottom = '1rem';
-    });
-
-    // Enhance code blocks
-    const codeBlocks = clone.querySelectorAll('pre, code');
-    codeBlocks.forEach(block => {
-      (block as HTMLElement).style.backgroundColor = '#f8f9fa';
-      (block as HTMLElement).style.padding = '1rem';
-      (block as HTMLElement).style.borderRadius = '4px';
-      (block as HTMLElement).style.fontFamily = 'Monaco, Consolas, "Liberation Mono", monospace';
-      (block as HTMLElement).style.fontSize = '0.9em';
-    });
-
-    // Enhance tables
-    const tables = clone.querySelectorAll('table');
-    tables.forEach(table => {
-      table.style.borderCollapse = 'collapse';
-      table.style.width = '100%';
-      table.style.marginBottom = '1.5rem';
-      
-      const cells = table.querySelectorAll('td, th');
-      cells.forEach(cell => {
-        (cell as HTMLElement).style.border = '1px solid #e2e8f0';
-        (cell as HTMLElement).style.padding = '0.75rem';
-      });
-    });
-
-    // Capture with optimized settings
+    // Enhanced canvas settings
     const canvas = await html2canvas(clone, {
-      scale: 2, // Higher scale for better quality
+      scale: 2,
       useCORS: true,
       allowTaint: false,
       logging: false,
       backgroundColor: 'white',
       imageTimeout: 15000,
       onclone: (clonedDoc) => {
-        // Additional styling for the cloned document
         const style = clonedDoc.createElement('style');
         style.innerHTML = `
           * { -webkit-print-color-adjust: exact !important; }
-          @page { margin: 0; }
+          @page { margin: 1cm; }
+          @media print {
+            body { margin: 0; }
+            img { max-width: 100% !important; }
+          }
         `;
         clonedDoc.head.appendChild(style);
       }
     });
 
-    // Calculate PDF dimensions (A4)
-    const imgWidth = 595.28; // A4 width in points
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
+    // Optimize PDF generation
     const pdf = new jsPDF({
-      orientation: imgHeight > imgWidth ? 'p' : 'l',
+      orientation: 'p',
       unit: 'pt',
-      format: [imgWidth, imgHeight],
+      format: 'a4',
       compress: true,
-      hotfixes: ['px_scaling']
+      hotfixes: ['px_scaling'],
     });
 
-    // Add image with improved quality
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
-    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
+    pdf.addImage(imgData, 'JPEG', 0, 0, 595.28, 841.89, undefined, 'FAST');
 
     return pdf.output('blob');
-  } catch (error) {
-    console.error('PDF generation error:', error);
-    throw error;
   } finally {
     if (document.body.contains(tempContainer)) {
       document.body.removeChild(tempContainer);
