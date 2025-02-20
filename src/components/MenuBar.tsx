@@ -19,10 +19,13 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [showAlert, setShowAlert] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [showImageDialog, setShowImageDialog] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
   
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const exportButtonRef = useRef<HTMLButtonElement>(null);
   const linkInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -110,6 +113,21 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
     setLinkUrl('');
   };
 
+  const handleImageDialog = () => {
+    setShowImageDialog(true);
+  };
+
+  const handleImageUrlSubmit = () => {
+    if (imageUrl && editor) {
+      editor.chain().focus().setImage({ src: imageUrl }).run();
+      setImageUrl('');
+      setShowImageDialog(false);
+      showNotification('Image added successfully', 'success');
+    } else {
+      showNotification('Please enter a valid image URL', 'error');
+    }
+  };
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -120,25 +138,10 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
 
       const reader = new FileReader();
       reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          let width = img.width;
-          let height = img.height;
-          const maxWidth = 800;
-
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
-          }
-
-          editor.chain().focus().setImage({
-            src: e.target?.result as string,
-            width,
-            height,
-          }).run();
-          showNotification('Image added successfully', 'success');
-        };
-        img.src = e.target?.result as string;
+        if (editor && e.target?.result) {
+          editor.chain().focus().setImage({ src: e.target.result as string }).run();
+          showNotification('Image uploaded successfully', 'success');
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -498,15 +501,97 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
         </div>
       )}
       
-      <label className="toolbar-button cursor-pointer" title="Add Image">
+      <button
+        onClick={handleImageDialog}
+        className="toolbar-button"
+        title="Add Image"
+      >
         <ImageIcon className="w-5 h-5" />
-        <input
-          type="file"
-          className="hidden"
-          accept="image/*"
-          onChange={handleImageUpload}
-        />
-      </label>
+      </button>
+
+      {/* Image Dialog */}
+      {showImageDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+              Add Image
+            </h3>
+            
+            <div className="space-y-4">
+              {/* Image URL Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Image URL
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="Enter image URL"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-[#0D1117] dark:text-gray-100"
+                  />
+                  <button
+                    onClick={handleImageUrlSubmit}
+                    className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white dark:bg-[#161B22] text-gray-500">or</span>
+                </div>
+              </div>
+
+              {/* Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Upload Image
+                </label>
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-md hover:border-gray-400 dark:hover:border-gray-600 transition-colors cursor-pointer" onClick={() => imageInputRef.current?.click()}>
+                  <div className="space-y-1 text-center">
+                    <FileUp className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="flex text-sm text-gray-600 dark:text-gray-400">
+                      <label className="relative cursor-pointer rounded-md font-medium text-purple-600 dark:text-purple-400 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
+                        <span>Upload a file</span>
+                        <input
+                          ref={imageInputRef}
+                          type="file"
+                          className="sr-only"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dialog Actions */}
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowImageDialog(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <button
         onClick={handleYoutubeEmbed}
         className="toolbar-button"
@@ -624,7 +709,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
             </button>
             <button
               onClick={() => handleDownload('html')}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 focus:text-gray-900 dark:focus:text-gray-100"
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 focus: outline-none focus:bg-gray-100 dark:focus:bg-gray-800 focus:text-gray-900 dark:focus:text-gray-100"
               role="menuitem"
               tabIndex={0}
             >
