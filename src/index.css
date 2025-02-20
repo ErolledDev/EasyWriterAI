@@ -32,7 +32,7 @@
 
 /* Remove the custom padding class since we don't need it anymore */
 .ProseMirror {
-  padding-top: 0 !important;
+  padding-top: 32px !important;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {

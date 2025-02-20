@@ -32,6 +32,7 @@ import { FontSize } from '../lib/extensions/fontSize';
 import { useState } from 'react';
 import AIMenu from './AIMenu';
 import MenuBar from './MenuBar';
+import { calculateReadingTime, calculateReadingLevel } from '../lib/metrics';
 
 // Custom Image extension with resizing
 const ResizableImage = Image.extend({
@@ -57,6 +58,9 @@ const ResizableImage = Image.extend({
 const Editor = () => {
   const [showAIMenu, setShowAIMenu] = useState(false);
   const [characterCount, setCharacterCount] = useState(0);
+  const [wordCount, setWordCount] = useState(0);
+  const [readingTime, setReadingTime] = useState('');
+  const [readingLevel, setReadingLevel] = useState('');
   
   const editor = useEditor({
     extensions: [
@@ -140,7 +144,7 @@ const Editor = () => {
     editorProps: {
       attributes: {
         class:
-          'prose prose-invert prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none p-8 min-h-[calc(100vh-13rem)] bg-white dark:bg-[#0D1117] text-gray-900 dark:text-gray-100 transition-colors duration-200 custom-padding-top-32',
+          'prose prose-invert prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none p-8 min-h-[calc(100vh-13rem)] bg-white dark:bg-[#0D1117] text-gray-900 dark:text-gray-100 transition-colors duration-200',
       },
       handleDrop: (view, event, slice, moved) => {
         if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
@@ -218,7 +222,12 @@ const Editor = () => {
       },
     },
     onUpdate: ({ editor }) => {
-      setCharacterCount(editor.storage.characterCount.characters());
+      const chars = editor.storage.characterCount.characters();
+      const words = editor.storage.characterCount.words();
+      setCharacterCount(chars);
+      setWordCount(words);
+      setReadingTime(calculateReadingTime(words));
+      setReadingLevel(calculateReadingLevel(editor.getText()));
     },
   });
 
@@ -226,15 +235,28 @@ const Editor = () => {
     <div className="w-full bg-white dark:bg-[#1D1D1D] shadow-xl border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
       <MenuBar editor={editor} onToggleAI={() => setShowAIMenu(!showAIMenu)} />
       <EditorContent editor={editor} />
-      <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[#2D2D2D] sticky bottom-0 transition-colors duration-200">
-        <div>
-          Characters: {characterCount}
+      <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-4 items-center text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[#2D2D2D] sticky bottom-0 transition-colors duration-200">
+        <div className="flex items-center gap-2">
+          <span className="font-medium">Characters:</span> {characterCount}
           {editor?.storage.characterCount.limit && (
-            <span> / {editor.storage.characterCount.limit()}</span>
+            <span>/ {editor.storage.characterCount.limit()}</span>
           )}
         </div>
-        <div>
-          Words: {editor?.storage.characterCount.words()}
+        <div className="flex items-center gap-2">
+          <span className="font-medium">Words:</span> {wordCount}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-medium">Reading Time:</span> {readingTime}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-medium">Reading Level:</span>
+          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+            readingLevel === 'Beginner' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+            readingLevel === 'Intermediate' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+            'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+          }`}>
+            {readingLevel}
+          </span>
         </div>
       </div>
       <AIMenu
