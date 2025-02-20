@@ -3,6 +3,7 @@ import { Editor } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Quote, Redo, Strikethrough, Undo, Link as LinkIcon, Highlighter, Wand2, AlignLeft, AlignCenter, AlignRight, AlignJustify, Heading1, Heading2, Heading3, Table as TableIcon, Image as ImageIcon, Youtube as YoutubeIcon, FileDown, Palette, Type, Eraser, Eye, MinusSquare, Underline as UnderlineIcon, Subscript as SubscriptIcon, Superscript as SuperscriptIcon, Code, CodeSquare, PanelLeftClose, PanelLeftOpen, Trash2, Copy, Scissors, Search, ZoomIn, ZoomOut, RotateCcw, Download, FileUp, Printer, Share2, Lock, Unlock, Settings, HelpCircle, ListChecks, Hash, AtSign, Moon, Sun, UnderlineIcon as TextDecoration, FileText, FileJson, File as FilePdf, X, AlertCircle } from 'lucide-react';
 import { downloadFile, ExportFormat } from '../lib/export';
 import { useTheme } from '../context/ThemeContext';
+import { updateApiKey, updateModel, generateAIResponse } from '../lib/gemini';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -305,12 +306,21 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
     }
   };
 
-  const handleSaveApiKey = () => {
-    localStorage.setItem('gemini_api_key', apiKey);
-    setShowSettings(false);
-    showNotification('API key saved successfully', 'success');
-    // Reload the page to apply the new API key
-    window.location.reload();
+  const handleSaveApiKey = async () => {
+    try {
+      // Update API key in the Gemini service
+      updateApiKey(apiKey);
+      updateModel();
+      
+      // Test the new API key with a simple prompt
+      await generateAIResponse("Hello", "rewrite");
+      
+      setShowSettings(false);
+      showNotification('API key saved and verified successfully', 'success');
+    } catch (error) {
+      showNotification('Invalid API key. Please check and try again.', 'error');
+      console.error('API key validation error:', error);
+    }
   };
 
   return (
@@ -707,13 +717,12 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onToggleAI }) => {
             className="absolute right-0 mt-2 py-2 w-48 bg-white dark:bg-[#161B22] rounded-md shadow-xl border border-gray-200 dark:border-gray-700"
             role="menu"
             aria-orientation="vertical"
-            aria-labelledby="export-menu-button"
-            onKeyDown={handleKeyDown}
+            aria-labelledby="export-menu-button" onKeyDown={handleKeyDown}
             tabIndex={-1}
           >
             <button
               onClick={() => handleDownload('markdown')}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 focus:outline-none focus :bg-gray-100 dark:focus:bg-gray-800 focus:text-gray-900 dark:focus:text-gray-100"
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 focus:text-gray-900 dark:focus:text-gray-100"
               role="menuitem"
               tabIndex={0}
             >

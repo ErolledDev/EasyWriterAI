@@ -1,7 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize with environment variable or localStorage
-const API_KEY = localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY;
+let API_KEY = localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY;
+
+// Function to update API key dynamically
+export function updateApiKey(newKey: string) {
+  API_KEY = newKey;
+  localStorage.setItem('gemini_api_key', newKey);
+}
 
 // Validate API key
 if (!API_KEY) {
@@ -9,7 +15,12 @@ if (!API_KEY) {
 }
 
 const genAI = new GoogleGenerativeAI(API_KEY || '');
-const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+let model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+
+// Function to update model instance
+export function updateModel() {
+  model = new GoogleGenerativeAI(API_KEY || '').getGenerativeModel({ model: 'gemini-pro' });
+}
 
 type AIAction = {
   type: 'rewrite' | 'modify' | 'tone' | 'transform';
