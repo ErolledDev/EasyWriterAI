@@ -7,19 +7,22 @@ let API_KEY = localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEM
 export function updateApiKey(newKey: string) {
   API_KEY = newKey;
   localStorage.setItem('gemini_api_key', newKey);
+  updateModel(); // Ensure model is updated with new key
 }
 
-// Validate API key
-if (!API_KEY) {
-  console.warn('Gemini API key is not set. Please set your API key in the settings.');
-}
-
-const genAI = new GoogleGenerativeAI(API_KEY || '');
-let model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+// Initialize model with a default key if available
+let genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
+let model = genAI?.getGenerativeModel({ model: 'gemini-pro' });
 
 // Function to update model instance
 export function updateModel() {
-  model = new GoogleGenerativeAI(API_KEY || '').getGenerativeModel({ model: 'gemini-pro' });
+  if (!API_KEY) {
+    genAI = null;
+    model = null;
+    return;
+  }
+  genAI = new GoogleGenerativeAI(API_KEY);
+  model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 }
 
 type AIAction = {
@@ -104,9 +107,12 @@ function extractJSONContent(text: string): string {
 }
 
 export async function generateAIResponse(text: string, actionKey: keyof typeof AI_ACTIONS) {
-  // Validate API key first
   if (!API_KEY) {
-    throw new Error('Gemini API key is not set. Please set VITE_GEMINI_API_KEY in your .env file.');
+    throw new Error('Please set your Gemini API key in the settings to use AI features.');
+  }
+
+  if (!model) {
+    throw new Error('AI model not initialized. Please check your API key.');
   }
 
   const action = AI_ACTIONS[actionKey];
@@ -134,7 +140,7 @@ export async function generateAIResponse(text: string, actionKey: keyof typeof A
   } catch (error) {
     console.error('AI generation error:', error);
     if (!API_KEY) {
-      throw new Error('Missing API key. Please set VITE_GEMINI_API_KEY in your .env file.');
+      throw new Error('Missing API key. Please set your Gemini API key in the settings.');
     }
     throw new Error('Failed to generate AI response. Please try again later.');
   }
