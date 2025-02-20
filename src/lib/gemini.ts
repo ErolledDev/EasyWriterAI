@@ -2,7 +2,13 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize with environment variable
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
+
+// Validate API key
+if (!API_KEY) {
+  console.warn('Gemini API key is not set. Please set VITE_GEMINI_API_KEY in your .env file.');
+}
+
+const genAI = new GoogleGenerativeAI(API_KEY || '');
 const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
 type AIAction = {
@@ -87,6 +93,11 @@ function extractJSONContent(text: string): string {
 }
 
 export async function generateAIResponse(text: string, actionKey: keyof typeof AI_ACTIONS) {
+  // Validate API key first
+  if (!API_KEY) {
+    throw new Error('Gemini API key is not set. Please set VITE_GEMINI_API_KEY in your .env file.');
+  }
+
   const action = AI_ACTIONS[actionKey];
   if (!action) throw new Error('Invalid action');
 
@@ -111,7 +122,10 @@ export async function generateAIResponse(text: string, actionKey: keyof typeof A
     return responseText;
   } catch (error) {
     console.error('AI generation error:', error);
-    throw error;
+    if (!API_KEY) {
+      throw new Error('Missing API key. Please set VITE_GEMINI_API_KEY in your .env file.');
+    }
+    throw new Error('Failed to generate AI response. Please try again later.');
   }
 }
 

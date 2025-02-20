@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Wand2, Sparkles, ChevronDown, ChevronRight, Pencil, Palette, Zap, Layout, GripHorizontal } from 'lucide-react';
+import { Wand2, Sparkles, ChevronDown, ChevronRight, Pencil, Palette, Zap, Layout, GripHorizontal, AlertCircle } from 'lucide-react';
 import { generateAIResponse, aiActions } from '../lib/gemini';
 import { Editor } from '@tiptap/react';
 
@@ -16,6 +16,7 @@ interface Position {
 
 export default function AIMenu({ editor, isOpen, onClose }: AIMenuProps) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -95,12 +96,13 @@ export default function AIMenu({ editor, isOpen, onClose }: AIMenuProps) {
   const handleAIAction = async (actionKey: string) => {
     const text = selectedText.trim();
     if (!text) {
-      alert('Please select some text or write content first');
+      setError('Please select some text or write content first');
       return;
     }
 
     try {
       setLoading(true);
+      setError(null);
       const result = await generateAIResponse(text, actionKey as any);
       
       if (editor.state.selection.empty) {
@@ -110,6 +112,7 @@ export default function AIMenu({ editor, isOpen, onClose }: AIMenuProps) {
         editor.commands.insertContent(result);
       }
     } catch (error) {
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
       console.error('AI generation failed:', error);
     } finally {
       setLoading(false);
@@ -179,6 +182,19 @@ export default function AIMenu({ editor, isOpen, onClose }: AIMenuProps) {
               <Sparkles className="w-4 h-4 text-purple-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
             </div>
             <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Generating content with AI...</p>
+          </div>
+        ) : error ? (
+          <div className="p-6 text-center">
+            <div className="flex items-center justify-center text-red-500 mb-2">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <p className="text-sm text-red-500">{error}</p>
+            <button
+              onClick={() => setError(null)}
+              className="mt-4 px-4 py-2 text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
+            >
+              Dismiss
+            </button>
           </div>
         ) : (
           <div className="p-2 space-y-2">
